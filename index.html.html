@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ruta Circular — Recicla fácil, gana puntos y ve tu impacto</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --green: #00a86b;
+      --green-dark: #008f5b;
+      --teal: #00c2a8;
+      --bg: #fafafa;
+      --white: #ffffff;
+      --text: #1a1a1a;
+      --text-light: #5f6368;
+      --border: #e8eaed;
+      --shadow: 0 4px 24px rgba(0,0,0,0.06);
+      --radius: 16px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ========== NAV ========== */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid transparent;
+      transition: all 0.3s ease;
+    }
+    nav.scrolled {
+      border-bottom-color: var(--border);
+      box-shadow: 0 1px 12px rgba(0,0,0,0.04);
+    }
+    .nav-inner {
+      max-width: 1200px; margin: 0 auto; padding: 16px 32px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo {
+      display: flex; align-items: center; gap: 10px;
+      font-weight: 700; font-size: 1.25rem; color: var(--text); text-decoration: none;
+    }
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--green), var(--teal));
+      border-radius: 10px; display: flex; align-items: center; justify-content: center;
+      color: white; font-size: 18px;
+    }
+    .nav-links { display: flex; gap: 32px; list-style: none; }
+    .nav-links a {
+      text-decoration: none; color: var(--text-light); font-weight: 500; font-size: 0.95rem;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--green); }
+    .nav-actions { display: flex; align-items: center; gap: 12px; }
+    .nav-cta {
+      background: var(--green); color: white; border: none;
+      padding: 10px 22px; border-radius: 999px; font-weight: 600; font-size: 0.9rem;
+      cursor: pointer; transition: all 0.25s ease;
+    }
+    .nav-cta:hover {
+      background: var(--green-dark); transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(0,168,107,0.3);
+    }
+    .btn-google {
+      display: flex; align-items: center; gap: 10px;
+      background: white; border: 1.5px solid var(--border);
+      padding: 10px 18px; border-radius: 999px; font-weight: 500; font-size: 0.9rem;
+      cursor: pointer; transition: all 0.25s ease; color: var(--text);
+    }
+    .btn-google:hover {
+      border-color: #dadce0; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transform: translateY(-1px);
+    }
+    .btn-google img { width: 18px; height: 18px; }
+
+    /* ========== HERO ========== */
+    .hero {
+      min-height: 100vh; display: flex; align-items: center;
+      padding: 120px 32px 80px;
+      background: linear-gradient(180deg, #f0fdf7 0%, #fafafa 100%);
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: ''; position: absolute; width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(0,194,168,0.12) 0%, transparent 70%);
+      top: -100px; right: -100px; border-radius: 50%;
+      animation: float 12s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translate(0,0); }
+      50% { transform: translate(-30px, 40px); }
+    }
+    .hero-content {
+      max-width: 1200px; margin: 0 auto;
+      display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 60px; align-items: center;
+      position: relative; z-index: 2;
+    }
+    .hero-text h1 {
+      font-size: clamp(2.8rem, 5vw, 4rem); font-weight: 700;
+      line-height: 1.15; letter-spacing: -0.03em; margin-bottom: 24px;
+    }
+    .hero-text h1 span {
+      background: linear-gradient(90deg, var(--green), var(--teal));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .hero-text p {
+      font-size: 1.2rem; color: var(--text-light); max-width: 480px;
+      margin-bottom: 36px; font-weight: 400;
+    }
+    .hero-buttons { display: flex; gap: 16px; flex-wrap: wrap; }
+    .btn-primary {
+      background: var(--green); color: white; border: none;
+      padding: 16px 32px; border-radius: 999px; font-weight: 600; font-size: 1rem;
+      cursor: pointer; transition: all 0.25s ease;
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn-primary:hover {
+      background: var(--green-dark); transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(0,168,107,0.35);
+    }
+    .btn-secondary {
+      background: white; color: var(--text); border: 1.5px solid var(--border);
+      padding: 16px 32px; border-radius: 999px; font-weight: 600; font-size: 1rem;
+      cursor: pointer; transition: all 0.25s ease;
+    }
+    .btn-secondary:hover {
+      border-color: var(--green); color: var(--green); transform: translateY(-2px);
+    }
+    .hero-card {
+      background: white; border-radius: 24px; padding: 32px;
+      box-shadow: var(--shadow); border: 1px solid var(--border);
+      transform: rotate(2deg); transition: transform 0.4s ease;
+    }
+    .hero-card:hover { transform: rotate(0deg) scale(1.02); }
+    .hero-card .points {
+      font-size: 3rem; font-weight: 700; color: var(--green); margin: 12px 0 4px;
+    }
+    .hero-card .label { color: var(--text-light); font-size: 0.9rem; }
+    .impact-row { display: flex; gap: 20px; margin-top: 28px; }
+    .impact-item {
+      flex: 1; background: #f0fdf7; border-radius: 14px; padding: 16px; text-align: center;
+    }
+    .impact-item strong { display: block; font-size: 1.4rem; color: var(--green); }
+
+    /* ========== FEATURES ========== */
+    .section { padding: 100px 32px; max-width: 1200px; margin: 0 auto; }
+    .section-header { text-align: center; margin-bottom: 64px; }
+    .section-header h2 {
+      font-size: 2.5rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 16px;
+    }
+    .section-header p {
+      color: var(--text-light); font-size: 1.15rem; max-width: 560px; margin: 0 auto;
+    }
+    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+    .feature-card {
+      background: white; border-radius: var(--radius); padding: 36px 28px;
+      border: 1px solid var(--border); transition: all 0.3s ease; cursor: default;
+    }
+    .feature-card:hover {
+      transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.08); border-color: transparent;
+    }
+    .feature-icon {
+      width: 56px; height: 56px; background: linear-gradient(135deg, #e6f9f0, #d0f5ea);
+      border-radius: 14px; display: flex; align-items: center; justify-content: center;
+      font-size: 26px; margin-bottom: 24px;
+    }
+    .feature-card h3 { font-size: 1.25rem; font-weight: 600; margin-bottom: 12px; }
+    .feature-card p { color: var(--text-light); font-size: 0.95rem; }
+
+    /* ========== STEPS ========== */
+    .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-top: 48px; }
+    .step { text-align: center; }
+    .step-number {
+      width: 48px; height: 48px; background: var(--green); color: white;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-weight: 700; margin: 0 auto 20px; font-size: 1.1rem;
+    }
+    .step h4 { font-size: 1.05rem; margin-bottom: 8px; }
+    .step p { color: var(--text-light); font-size: 0.9rem; }
+
+    /* ========== CTA ========== */
+    .cta-section {
+      background: linear-gradient(135deg, var(--green), var(--teal));
+      border-radius: 28px; padding: 72px 48px; text-align: center; color: white;
+      margin: 40px 32px 100px; max-width: 1200px; margin-left: auto; margin-right: auto;
+    }
+    .cta-section h2 { font-size: 2.4rem; font-weight: 700; margin-bottom: 16px; }
+    .cta-section p { opacity: 0.9; font-size: 1.15rem; margin-bottom: 32px; }
+    .cta-section .btn-primary { background: white; color: var(--green); }
+    .cta-section .btn-primary:hover {
+      background: #f0fdf7; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    }
+
+    /* ========== FOOTER ========== */
+    footer {
+      background: #111; color: #aaa; padding: 60px 32px 40px; text-align: center; font-size: 0.9rem;
+    }
+    footer .logo { color: white; justify-content: center; margin-bottom: 20px; }
+
+    /* ========== CHATBOT ========== */
+    .chat-toggle {
+      position: fixed; bottom: 28px; right: 28px; z-index: 200;
+      width: 64px; height: 64px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--green), var(--teal));
+      color: white; border: none; font-size: 28px; cursor: pointer;
+      box-shadow: 0 8px 30px rgba(0,168,107,0.4);
+      transition: all 0.3s ease; display: flex; align-items: center; justify-content: center;
+    }
+    .chat-toggle:hover { transform: scale(1.08); box-shadow: 0 12px 36px rgba(0,168,107,0.5); }
+    .chat-toggle.open { background: #333; }
+
+    .chat-window {
+      position: fixed; bottom: 108px; right: 28px; z-index: 200;
+      width: 380px; max-width: calc(100vw - 40px); height: 520px;
+      background: white; border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+      display: flex; flex-direction: column; overflow: hidden;
+      opacity: 0; pointer-events: none; transform: translateY(20px) scale(0.95);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .chat-window.open {
+      opacity: 1; pointer-events: all; transform: translateY(0) scale(1);
+    }
+
+    .chat-header {
+      background: linear-gradient(135deg, var(--green), var(--teal));
+      color: white; padding: 18px 20px; display: flex; align-items: center; gap: 12px;
+    }
+    .chat-header .avatar {
+      width: 40px; height: 40px; background: rgba(255,255,255,0.2);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px;
+    }
+    .chat-header h3 { font-size: 1rem; font-weight: 600; }
+    .chat-header p { font-size: 0.75rem; opacity: 0.85; }
+
+    .chat-messages {
+      flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 14px;
+      background: #f8f9fa;
+    }
+    .message {
+      max-width: 85%; padding: 12px 16px; border-radius: 16px; font-size: 0.9rem; line-height: 1.45;
+    }
+    .message.bot {
+      background: white; align-self: flex-start;
+      border-bottom-left-radius: 4px; box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+    .message.user {
+      background: var(--green); color: white; align-self: flex-end;
+      border-bottom-right-radius: 4px;
+    }
+    .message img {
+      max-width: 100%; border-radius: 10px; margin-top: 8px; display: block;
+    }
+
+    .chat-input-area {
+      padding: 14px 16px; border-top: 1px solid var(--border);
+      display: flex; gap: 10px; align-items: center; background: white;
+    }
+    .chat-input-area input[type="text"] {
+      flex: 1; border: 1.5px solid var(--border); border-radius: 999px;
+      padding: 11px 18px; font-size: 0.9rem; outline: none; transition: border 0.2s;
+    }
+    .chat-input-area input[type="text"]:focus { border-color: var(--green); }
+    .chat-input-area button {
+      width: 42px; height: 42px; border-radius: 50%; border: none;
+      background: var(--green); color: white; cursor: pointer; font-size: 18px;
+      display: flex; align-items: center; justify-content: center; transition: background 0.2s;
+    }
+    .chat-input-area button:hover { background: var(--green-dark); }
+    .photo-btn {
+      background: #f0fdf7 !important; color: var(--green) !important; border: 1.5px solid #d0f5ea !important;
+    }
+    .photo-btn:hover { background: #e6f9f0 !important; }
+
+    /* Login Modal */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 300;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity 0.3s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal {
+      background: white; border-radius: 20px; padding: 40px; width: 400px; max-width: 90vw;
+      text-align: center; transform: scale(0.95); transition: transform 0.3s;
+    }
+    .modal-overlay.open .modal { transform: scale(1); }
+    .modal h2 { font-size: 1.5rem; margin-bottom: 8px; }
+    .modal p { color: var(--text-light); margin-bottom: 28px; font-size: 0.95rem; }
+    .modal .btn-google { width: 100%; justify-content: center; padding: 14px; font-size: 1rem; margin-bottom: 12px; }
+    .modal .divider {
+      display: flex; align-items: center; gap: 12px; color: #999; font-size: 0.85rem; margin: 20px 0;
+    }
+    .modal .divider::before, .modal .divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+    .modal input {
+      width: 100%; padding: 12px 16px; border: 1.5px solid var(--border);
+      border-radius: 10px; margin-bottom: 12px; font-size: 0.95rem; outline: none;
+    }
+    .modal input:focus { border-color: var(--green); }
+    .close-modal {
+      position: absolute; top: 16px; right: 16px; background: none; border: none;
+      font-size: 24px; cursor: pointer; color: #999;
+    }
+
+    /* User logged state */
+    .user-chip {
+      display: none; align-items: center; gap: 8px;
+      background: #f0fdf7; padding: 6px 14px 6px 6px; border-radius: 999px;
+      font-size: 0.85rem; font-weight: 500;
+    }
+    .user-chip img {
+      width: 28px; height: 28px; border-radius: 50%;
+    }
+    .user-chip.visible { display: flex; }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .hero-content { grid-template-columns: 1fr; text-align: center; }
+      .hero-text p { margin-left: auto; margin-right: auto; }
+      .hero-buttons { justify-content: center; }
+      .features-grid { grid-template-columns: 1fr; }
+      .steps { grid-template-columns: 1fr 1fr; }
+      .nav-links { display: none; }
+    }
+    @media (max-width: 600px) {
+      .steps { grid-template-columns: 1fr; }
+      .chat-window { right: 12px; bottom: 90px; width: calc(100vw - 24px); height: 70vh; }
+    }
+
+    .reveal {
+      opacity: 0; transform: translateY(30px);
+      transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav id="navbar">
+    <div class="nav-inner">
+      <a href="#" class="logo">
+        <div class="logo-icon">♻</div>
+        Ruta Circular
+      </a>
+      <ul class="nav-links">
+        <li><a href="#como-funciona">Cómo funciona</a></li>
+        <li><a href="#beneficios">Beneficios</a></li>
+        <li><a href="#impacto">Impacto</a></li>
+      </ul>
+      <div class="nav-actions">
+        <div class="user-chip" id="userChip">
+          <img id="userAvatar" src="" alt="Usuario">
+          <span id="userName">Usuario</span>
+        </div>
+        <button class="btn-google" id="btnGoogleNav" onclick="openGoogleAccounts()">
+          <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+          Continuar con Google
+        </button>
+        <button class="nav-cta" id="btnLogin" onclick="openLoginModal()">Iniciar sesión</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-text">
+        <h1>Recicla fácil,<br><span>gana puntos</span><br>y ve tu impacto</h1>
+        <p>Conectamos hogares, restaurantes y comercios con recicladores de forma simple, confiable y motivadora.</p>
+        <div class="hero-buttons">
+          <button class="btn-primary" onclick="document.getElementById('solicitar').scrollIntoView({behavior:'smooth'})">
+            Solicitar recolección →
+          </button>
+          <button class="btn-secondary">Soy reciclador</button>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-card">
+          <div class="label">Tus puntos acumulados</div>
+          <div class="points">1.240</div>
+          <div class="label">¡Sigue así! Cada kilo cuenta</div>
+          <div class="impact-row">
+            <div class="impact-item">
+              <strong>48 kg</strong>
+              <span style="font-size:0.8rem;color:#5f6368">Reciclados</span>
+            </div>
+            <div class="impact-item">
+              <strong>32 kg</strong>
+              <span style="font-size:0.8rem;color:#5f6368">CO₂ evitado</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="section" id="beneficios">
+    <div class="section-header reveal">
+      <h2>Todo lo que necesitas para reciclar mejor</h2>
+      <p>Diseñado para que reciclar sea tan simple como pedir un domicilio.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card reveal">
+        <div class="feature-icon">📅</div>
+        <h3>Agenda de recolección</h3>
+        <p>Programa el retiro de tus materiales el día y hora que más te convenga. Sin complicaciones.</p>
+      </div>
+      <div class="feature-card reveal">
+        <div class="feature-icon">⭐</div>
+        <h3>Puntos por kilos</h3>
+        <p>Gana puntos por cada kilo reciclado y canjéalos por beneficios y descuentos reales.</p>
+      </div>
+      <div class="feature-card reveal">
+        <div class="feature-icon">📊</div>
+        <h3>Tablero de impacto</h3>
+        <p>Visualiza en tiempo real cuántos kilos has recuperado y cuánto CO₂ has evitado.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="section" id="como-funciona" style="background:#fff; max-width:100%; padding:100px 32px;">
+    <div style="max-width:1200px; margin:0 auto;">
+      <div class="section-header reveal">
+        <h2>Así de simple funciona</h2>
+        <p>Cuatro pasos para cerrar el ciclo de tus materiales.</p>
+      </div>
+      <div class="steps">
+        <div class="step reveal">
+          <div class="step-number">1</div>
+          <h4>Regístrate</h4>
+          <p>Crea tu cuenta en menos de un minuto</p>
+        </div>
+        <div class="step reveal">
+          <div class="step-number">2</div>
+          <h4>Agenda</h4>
+          <p>Elige materiales, fecha y hora</p>
+        </div>
+        <div class="step reveal">
+          <div class="step-number">3</div>
+          <h4>Entrega</h4>
+          <p>Muestra el QR al reciclador</p>
+        </div>
+        <div class="step reveal">
+          <div class="step-number">4</div>
+          <h4>Impacta</h4>
+          <p>Acumula puntos y ve tu huella positiva</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <div class="cta-section reveal" id="solicitar">
+    <h2>¿Listo para empezar a reciclar con impacto?</h2>
+    <p>Únete a cientos de hogares y comercios que ya están cerrando el ciclo.</p>
+    <button class="btn-primary" onclick="openLoginModal()">Crear mi cuenta gratis</button>
+  </div>
+
+  <footer>
+    <div class="logo">
+      <div class="logo-icon">♻</div>
+      Ruta Circular
+    </div>
+    <p>Economía circular • Optimización logística • Impacto real</p>
+    <p style="margin-top:12px; opacity:0.6;">Proyecto académico Digital Business — 2026</p>
+  </footer>
+
+  <!-- ========== CHATBOT ========== -->
+  <button class="chat-toggle" id="chatToggle" onclick="toggleChat()">💬</button>
+
+  <div class="chat-window" id="chatWindow">
+    <div class="chat-header">
+      <div class="avatar">🤖</div>
+      <div>
+        <h3>Asistente Circular</h3>
+        <p>Te ayudo a identificar qué es aprovechable</p>
+      </div>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+      <div class="message bot">
+        ¡Hola! 👋 Soy el Asistente de Ruta Circular.<br><br>
+        Puedo ayudarte a saber si algo es <strong>aprovechable</strong> según la normativa colombiana de separación en la fuente.<br><br>
+        📸 <strong>Envíame una foto</strong> del material o descríbemelo por texto.
+      </div>
+    </div>
+    <div class="chat-input-area">
+      <button class="photo-btn" onclick="document.getElementById('photoInput').click()" title="Subir foto">📷</button>
+      <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="handlePhoto(event)">
+      <input type="text" id="chatInput" placeholder="Escribe o sube una foto..." onkeypress="if(event.key==='Enter')sendMessage()">
+      <button onclick="sendMessage()">➤</button>
+    </div>
+  </div>
+
+  <!-- ========== LOGIN MODAL ========== -->
+  <div class="modal-overlay" id="loginModal">
+    <div class="modal" style="position:relative">
+      <button class="close-modal" onclick="closeLoginModal()">×</button>
+      <div class="logo" style="justify-content:center; margin-bottom:20px;">
+        <div class="logo-icon">♻</div>
+        Ruta Circular
+      </div>
+      <h2>Bienvenido</h2>
+      <p>Inicia sesión para agendar recolecciones y acumular puntos</p>
+
+      <button class="btn-google" onclick="openGoogleAccounts()">
+        <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+        Continuar con Google
+      </button>
+
+      <div class="divider">o</div>
+
+      <input type="email" placeholder="Correo electrónico" id="emailInput" required>
+      <input type="password" placeholder="Contraseña" id="passInput" required>
+      <button class="btn-primary" id="btnEmailLogin" style="width:100%; margin-top:8px;" onclick="simulateEmailLogin()">
+        Iniciar sesión
+      </button>
+      <p style="margin-top:16px; font-size:0.85rem; color:#888;">
+        ¿No tienes cuenta? <a href="#" onclick="simulateEmailLogin()" style="color:var(--green); font-weight:600;">Regístrate gratis</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- ========== GOOGLE ACCOUNT SELECTOR (simulado realista) ========== -->
+  <div class="modal-overlay" id="googleAccountsModal">
+    <div class="modal" style="position:relative; max-width:420px; padding:0; overflow:hidden; text-align:left;">
+      <div style="padding:24px 24px 16px; border-bottom:1px solid #eee; display:flex; align-items:center; gap:12px;">
+        <svg width="24" height="24" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+        <div>
+          <div style="font-size:1.05rem; font-weight:600; color:#202124;">Elige una cuenta</div>
+          <div style="font-size:0.85rem; color:#5f6368;">para continuar a Ruta Circular</div>
+        </div>
+      </div>
+
+      <div style="padding:8px 0;">
+        <!-- Cuenta 1 -->
+        <div class="google-account" onclick="selectGoogleAccount('Camila Rodríguez', 'camila.rodriguez@gmail.com')" style="display:flex; align-items:center; gap:16px; padding:12px 24px; cursor:pointer; transition:background 0.15s;">
+          <img src="https://ui-avatars.com/api/?name=Camila+Rodriguez&background=7c3aed&color=fff&size=64" style="width:40px; height:40px; border-radius:50%;" alt="">
+          <div style="flex:1;">
+            <div style="font-weight:500; font-size:0.95rem; color:#202124;">Camila Rodríguez</div>
+            <div style="font-size:0.85rem; color:#5f6368;">camila.rodriguez@gmail.com</div>
+          </div>
+        </div>
+
+        <!-- Cuenta 2 -->
+        <div class="google-account" onclick="selectGoogleAccount('Andrés Gómez', 'andres.gomez@gmail.com')" style="display:flex; align-items:center; gap:16px; padding:12px 24px; cursor:pointer; transition:background 0.15s;">
+          <img src="https://ui-avatars.com/api/?name=Andres+Gomez&background=2563eb&color=fff&size=64" style="width:40px; height:40px; border-radius:50%;" alt="">
+          <div style="flex:1;">
+            <div style="font-weight:500; font-size:0.95rem; color:#202124;">Andrés Gómez</div>
+            <div style="font-size:0.85rem; color:#5f6368;">andres.gomez@gmail.com</div>
+          </div>
+        </div>
+
+        <!-- Cuenta 3 -->
+        <div class="google-account" onclick="selectGoogleAccount('Laura Martínez', 'laura.martinez@gmail.com')" style="display:flex; align-items:center; gap:16px; padding:12px 24px; cursor:pointer; transition:background 0.15s;">
+          <img src="https://ui-avatars.com/api/?name=Laura+Martinez&background=db2777&color=fff&size=64" style="width:40px; height:40px; border-radius:50%;" alt="">
+          <div style="flex:1;">
+            <div style="font-weight:500; font-size:0.95rem; color:#202124;">Laura Martínez</div>
+            <div style="font-size:0.85rem; color:#5f6368;">laura.martinez@gmail.com</div>
+          </div>
+        </div>
+
+        <!-- Usar otra cuenta -->
+        <div class="google-account" onclick="selectGoogleAccount('Otra cuenta', 'usuario@gmail.com')" style="display:flex; align-items:center; gap:16px; padding:12px 24px; cursor:pointer; transition:background 0.15s; border-top:1px solid #eee; margin-top:4px;">
+          <div style="width:40px; height:40px; border-radius:50%; background:#f1f3f4; display:flex; align-items:center; justify-content:center; font-size:20px;">👤</div>
+          <div style="flex:1;">
+            <div style="font-weight:500; font-size:0.95rem; color:#202124;">Usar otra cuenta</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding:16px 24px 20px; font-size:0.75rem; color:#5f6368; line-height:1.4; border-top:1px solid #eee;">
+        Para continuar, Google compartirá tu nombre, dirección de correo electrónico y foto de perfil con Ruta Circular.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ===== NAVBAR =====
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      navbar.classList.toggle('scrolled', window.scrollY > 40);
+    });
+
+    // ===== REVEAL =====
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.15 });
+    reveals.forEach(el => observer.observe(el));
+
+    // ===== LOGIN =====
+    function openLoginModal() {
+      document.getElementById('loginModal').classList.add('open');
+      // Focus on email field
+      setTimeout(() => document.getElementById('emailInput').focus(), 300);
+    }
+    function closeLoginModal() {
+      document.getElementById('loginModal').classList.remove('open');
+    }
+
+    function loginSuccess(name, avatarUrl) {
+      document.getElementById('userName').textContent = name;
+      document.getElementById('userAvatar').src = avatarUrl;
+      document.getElementById('userChip').classList.add('visible');
+      document.getElementById('btnGoogleNav').style.display = 'none';
+      document.getElementById('btnLogin').style.display = 'none';
+      closeLoginModal();
+      showToast('¡Bienvenido/a ' + name + '! Sesión iniciada correctamente');
+    }
+
+    function openGoogleAccounts() {
+      // Cerrar el modal de login normal y abrir el selector de cuentas de Google
+      closeLoginModal();
+      document.getElementById('googleAccountsModal').classList.add('open');
+    }
+
+    function selectGoogleAccount(fullName, email) {
+      const firstName = fullName.split(' ')[0];
+      const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=00a86b&color=fff&size=128`;
+      
+      // Cerrar el selector
+      document.getElementById('googleAccountsModal').classList.remove('open');
+      
+      // Pequeña demora para que se sienta real
+      setTimeout(() => {
+        loginSuccess(firstName, avatar);
+      }, 300);
+    }
+
+    // Cerrar el modal de Google si se hace clic fuera
+    document.getElementById('googleAccountsModal')?.addEventListener('click', function(e) {
+      if (e.target === this) {
+        this.classList.remove('open');
+      }
+    });
+
+    // Estilo hover para las cuentas
+    document.querySelectorAll('.google-account').forEach(el => {
+      el.addEventListener('mouseenter', () => el.style.background = '#f8f9fa');
+      el.addEventListener('mouseleave', () => el.style.background = 'transparent');
+    });
+
+    function simulateEmailLogin() {
+      const email = document.getElementById('emailInput').value.trim();
+      const password = document.getElementById('passInput').value;
+
+      // Validaciones como en una app real
+      if (!email) {
+        alert('Por favor escribe tu correo electrónico');
+        document.getElementById('emailInput').focus();
+        return;
+      }
+      if (!email.includes('@') || !email.includes('.')) {
+        alert('Por favor escribe un correo válido (ejemplo: juan@gmail.com)');
+        document.getElementById('emailInput').focus();
+        return;
+      }
+      if (!password) {
+        alert('Por favor escribe tu contraseña');
+        document.getElementById('passInput').focus();
+        return;
+      }
+      if (password.length < 4) {
+        alert('La contraseña debe tener al menos 4 caracteres');
+        document.getElementById('passInput').focus();
+        return;
+      }
+
+      // Simular carga (como apps reales)
+      const btn = document.getElementById('btnEmailLogin');
+      const originalText = btn.textContent;
+      btn.textContent = 'Iniciando sesión...';
+      btn.disabled = true;
+      btn.style.opacity = '0.7';
+
+      setTimeout(() => {
+        // Extraer nombre del correo
+        let name = email.split('@')[0];
+        name = name.charAt(0).toUpperCase() + name.slice(1);
+
+        const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=00a86b&color=fff&size=128`;
+        
+        loginSuccess(name, avatar);
+
+        // Restaurar botón
+        btn.textContent = originalText;
+        btn.disabled = false;
+        btn.style.opacity = '1';
+      }, 900);
+    }
+
+    // Permitir Enter en los campos de login
+    document.getElementById('emailInput')?.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') document.getElementById('passInput').focus();
+    });
+    document.getElementById('passInput')?.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') simulateEmailLogin();
+    });
+
+    function showToast(msg) {
+      const t = document.createElement('div');
+      t.textContent = msg;
+      t.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#111;color:white;padding:14px 28px;border-radius:999px;font-size:0.9rem;z-index:999;box-shadow:0 8px 30px rgba(0,0,0,0.2);';
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 3200);
+    }
+
+    // ===== CHATBOT =====
+    function toggleChat() {
+      const win = document.getElementById('chatWindow');
+      const btn = document.getElementById('chatToggle');
+      win.classList.toggle('open');
+      btn.classList.toggle('open');
+      btn.textContent = win.classList.contains('open') ? '✕' : '💬';
+    }
+
+    function addMessage(text, type = 'bot', imageUrl = null) {
+      const container = document.getElementById('chatMessages');
+      const div = document.createElement('div');
+      div.className = `message ${type}`;
+      div.innerHTML = text;
+      if (imageUrl) {
+        const img = document.createElement('img');
+        img.src = imageUrl;
+        div.appendChild(img);
+      }
+      container.appendChild(div);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function sendMessage() {
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text) return;
+      addMessage(text, 'user');
+      input.value = '';
+      setTimeout(() => respondToText(text), 700);
+    }
+
+    function handlePhoto(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        addMessage('📷 Foto enviada', 'user', ev.target.result);
+        setTimeout(() => analyzePhoto(file.name), 1200);
+      };
+      reader.readAsDataURL(file);
+      e.target.value = '';
+    }
+
+    // Base de conocimiento simple según normativa colombiana (Resolución 2184 de 2019 y prácticas de Bogotá)
+    function analyzePhoto(filename) {
+      const name = filename.toLowerCase();
+      let response = '';
+
+      // Simulación inteligente basada en nombre del archivo + respuestas educativas
+      if (name.includes('botella') || name.includes('plastic') || name.includes('pet') || name.includes('vaso')) {
+        response = `✅ <strong>Aprovechable</strong><br><br>
+        Este material (plástico PET o similar) sí es reciclable según la normativa colombiana de separación en la fuente.<br><br>
+        <strong>Recomendación:</strong><br>
+        • Enjuágalo si tiene residuos de comida/bebida<br>
+        • No lo aplastes demasiado (facilita la identificación)<br>
+        • Va en la bolsa o contenedor de <strong>aprovechables</strong> (generalmente blanca o verde según tu ciudad)<br><br>
+        ¡Puedes agendar su recolección y ganar puntos! 🌱`;
+      } else if (name.includes('carton') || name.includes('caja') || name.includes('papel') || name.includes('periodico') || name.includes('revista')) {
+        response = `✅ <strong>Aprovechable</strong><br><br>
+        El papel y el cartón son de los materiales más valiosos en el reciclaje colombiano.<br><br>
+        <strong>Consejo:</strong><br>
+        • Debe estar limpio y seco<br>
+        • Retira cintas adhesivas y plásticos si es posible<br>
+        • No sirve si está muy contaminado con grasa o comida<br><br>
+        ¡Excelente material para tu próxima recolección!`;
+      } else if (name.includes('vidrio') || name.includes('botella_vidrio') || name.includes('frasco')) {
+        response = `✅ <strong>Aprovechable</strong><br><br>
+        El vidrio es 100% reciclable y no pierde calidad.<br><br>
+        <strong>Importante:</strong><br>
+        • Enjuágalo<br>
+        • No lo mezcles con cerámica o espejos (esos no van)<br>
+        • En muchas ciudades se recolecta por separado<br><br>
+        Puedes incluirlo en tu agenda de Ruta Circular.`;
+      } else if (name.includes('lata') || name.includes('aluminio') || name.includes('metal') || name.includes('lata_cerveza')) {
+        response = `✅ <strong>Aprovechable</strong><br><br>
+        Metales y aluminio tienen alto valor de recuperación en Colombia.<br><br>
+        • Enjuaga las latas<br>
+        • Puedes aplastarlas para ahorrar espacio<br>
+        • Son muy cotizados por los recicladores<br><br>
+        ¡Genial para sumar puntos!`;
+      } else if (name.includes('organico') || name.includes('comida') || name.includes('cascara') || name.includes('banana') || name.includes('resto')) {
+        response = `❌ <strong>No aprovechable (en esta plataforma)</strong><br><br>
+        Los residuos orgánicos no se recolectan a través de Ruta Circular.<br><br>
+        Según la normativa, van en la bolsa <strong>verde o negra</strong> (según tu municipio) para compostaje o disposición final.<br><br>
+        Nosotros nos enfocamos en materiales secos aprovechables: papel, cartón, plástico, vidrio y metal.`;
+      } else if (name.includes('icopor') || name.includes('espuma') || name.includes('tecnopor')) {
+        response = `⚠️ <strong>Difícil de aprovechar</strong><br><br>
+        El icopor (poliestireno expandido) es complicado de reciclar en la mayoría de ciudades colombianas.<br><br>
+        En Bogotá y otras ciudades grandes casi no se recupera. Mejor evita usarlo o busca puntos especiales de recolección.`;
+      } else {
+        // Respuesta genérica inteligente
+        response = `🔍 Estoy analizando la imagen...<br><br>
+        Según la <strong>Resolución 2184 de 2019</strong> y las guías de separación en la fuente en Colombia, los materiales <strong>aprovechables</strong> principales son:<br><br>
+        ✅ Papel y cartón limpios<br>
+        ✅ Plásticos (PET, PEAD, etc.)<br>
+        ✅ Vidrio<br>
+        ✅ Metales y aluminio<br><br>
+        ❌ No van: orgánicos, icopor, pañales, papel higiénico, cerámica, espejos.<br><br>
+        ¿Puedes describirme mejor qué material es? O sube otra foto más clara.`;
+      }
+
+      addMessage(response, 'bot');
+    }
+
+    function respondToText(text) {
+      const t = text.toLowerCase();
+      let response = '';
+
+      if (t.includes('hola') || t.includes('buenas') || t.includes('hey')) {
+        response = '¡Hola! 😊 ¿En qué te puedo ayudar? Puedes enviarme una foto de algo que quieras reciclar o preguntarme sobre la normativa.';
+      } else if (t.includes('plastico') || t.includes('botella') || t.includes('pet')) {
+        response = '✅ Las botellas plásticas PET sí son aprovechables. Enjuágalas y colócalas en tu bolsa de reciclables. ¡Ganarás puntos por cada kilo!';
+      } else if (t.includes('carton') || t.includes('caja') || t.includes('papel')) {
+        response = '✅ Papel y cartón limpios son excelentes para reciclar. Evita que estén grasosos o muy sucios.';
+      } else if (t.includes('vidrio')) {
+        response = '✅ El vidrio es 100% reciclable. Solo asegúrate de que no sea espejo ni cerámica.';
+      } else if (t.includes('organico') || t.includes('comida') || t.includes('cascara')) {
+        response = '❌ Los orgánicos no los recolectamos en Ruta Circular. Van en la bolsa de residuales o compostaje según tu ciudad.';
+      } else if (t.includes('norma') || t.includes('ley') || t.includes('resolucion') || t.includes('bogota')) {
+        response = 'En Colombia la separación en la fuente se rige principalmente por la <strong>Resolución 2184 de 2019</strong> del Ministerio de Ambiente. Los aprovechables (papel, cartón, plástico, vidrio, metal) deben separarse de los no aprovechables y orgánicos.';
+      } else if (t.includes('punto') || t.includes('ganar') || t.includes('recompensa')) {
+        response = '¡Cada kilo de material aprovechable que entregues te suma puntos! Luego podrás canjearlos por beneficios. Mientras más reciclas, más impacto generas 🌱';
+      } else {
+        response = 'Puedo ayudarte a identificar si un material es aprovechable. <strong>Sube una foto</strong> 📷 o dime qué material es (ej: “botella de plástico”, “caja de cartón”, “restos de comida”…).';
+      }
+      addMessage(response, 'bot');
+    }
+  </script>
+</body>
+</html>
