@@ -7,14 +7,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <!-- Google Identity Services -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     :root {
       --green: #00a86b;
       --green-dark: #008f5b;
       --teal: #00c2a8;
-      --bg: #fafafa;
+      --bg: #f5f7f6;
       --white: #ffffff;
       --text: #1a1a1a;
       --text-light: #5f6368;
@@ -22,7 +21,6 @@
       --shadow: 0 4px 24px rgba(0,0,0,0.06);
       --radius: 16px;
     }
-
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html { scroll-behavior: smooth; }
     body {
@@ -33,260 +31,215 @@
       overflow-x: hidden;
     }
 
-    /* ========== NAV ========== */
+    /* NAV */
     nav {
       position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-      background: rgba(255,255,255,0.85);
+      background: rgba(255,255,255,0.9);
       backdrop-filter: blur(20px);
       border-bottom: 1px solid transparent;
       transition: all 0.3s ease;
     }
-    nav.scrolled {
-      border-bottom-color: var(--border);
-      box-shadow: 0 1px 12px rgba(0,0,0,0.04);
-    }
+    nav.scrolled { border-bottom-color: var(--border); box-shadow: 0 1px 12px rgba(0,0,0,0.04); }
     .nav-inner {
-      max-width: 1200px; margin: 0 auto; padding: 16px 32px;
+      max-width: 1200px; margin: 0 auto; padding: 14px 24px;
       display: flex; align-items: center; justify-content: space-between;
     }
     .logo {
       display: flex; align-items: center; gap: 10px;
-      font-weight: 700; font-size: 1.25rem; color: var(--text); text-decoration: none;
+      font-weight: 700; font-size: 1.2rem; color: var(--text); text-decoration: none;
     }
     .logo-icon {
-      width: 36px; height: 36px;
+      width: 34px; height: 34px;
       background: linear-gradient(135deg, var(--green), var(--teal));
       border-radius: 10px; display: flex; align-items: center; justify-content: center;
-      color: white; font-size: 18px;
+      color: white; font-size: 17px;
     }
-    .nav-links { display: flex; gap: 32px; list-style: none; }
+    .nav-links { display: flex; gap: 28px; list-style: none; }
     .nav-links a {
-      text-decoration: none; color: var(--text-light); font-weight: 500; font-size: 0.95rem;
+      text-decoration: none; color: var(--text-light); font-weight: 500; font-size: 0.92rem;
       transition: color 0.2s;
     }
-    .nav-links a:hover { color: var(--green); }
+    .nav-links a:hover, .nav-links a.active { color: var(--green); }
     .nav-actions { display: flex; align-items: center; gap: 12px; }
     .nav-cta {
       background: var(--green); color: white; border: none;
-      padding: 10px 22px; border-radius: 999px; font-weight: 600; font-size: 0.9rem;
+      padding: 10px 20px; border-radius: 999px; font-weight: 600; font-size: 0.9rem;
       cursor: pointer; transition: all 0.25s ease;
     }
-    .nav-cta:hover {
-      background: var(--green-dark); transform: translateY(-1px);
-      box-shadow: 0 6px 20px rgba(0,168,107,0.3);
-    }
+    .nav-cta:hover { background: var(--green-dark); transform: translateY(-1px); }
     .btn-google {
-      display: flex; align-items: center; gap: 10px;
+      display: flex; align-items: center; gap: 8px;
       background: white; border: 1.5px solid var(--border);
-      padding: 10px 18px; border-radius: 999px; font-weight: 500; font-size: 0.9rem;
-      cursor: pointer; transition: all 0.25s ease; color: var(--text);
+      padding: 9px 16px; border-radius: 999px; font-weight: 500; font-size: 0.88rem;
+      cursor: pointer; transition: all 0.25s; color: var(--text);
     }
-    .btn-google:hover {
-      border-color: #dadce0; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      transform: translateY(-1px);
+    .btn-google:hover { border-color: #dadce0; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .user-chip {
+      display: none; align-items: center; gap: 8px;
+      background: #f0fdf7; padding: 5px 12px 5px 5px; border-radius: 999px;
+      font-size: 0.85rem; font-weight: 500; cursor: pointer;
     }
-    .btn-google img { width: 18px; height: 18px; }
+    .user-chip img { width: 28px; height: 28px; border-radius: 50%; }
+    .user-chip.visible { display: flex; }
 
-    /* ========== HERO ========== */
+    /* PAGES */
+    .page { display: none; min-height: 100vh; padding-top: 80px; }
+    .page.active { display: block; }
+
+    /* HERO */
     .hero {
-      min-height: 100vh; display: flex; align-items: center;
-      padding: 120px 32px 80px;
-      background: linear-gradient(180deg, #f0fdf7 0%, #fafafa 100%);
-      position: relative; overflow: hidden;
-    }
-    .hero::before {
-      content: ''; position: absolute; width: 600px; height: 600px;
-      background: radial-gradient(circle, rgba(0,194,168,0.12) 0%, transparent 70%);
-      top: -100px; right: -100px; border-radius: 50%;
-      animation: float 12s ease-in-out infinite;
-    }
-    @keyframes float {
-      0%, 100% { transform: translate(0,0); }
-      50% { transform: translate(-30px, 40px); }
+      min-height: calc(100vh - 80px); display: flex; align-items: center;
+      padding: 40px 24px 80px;
+      background: linear-gradient(180deg, #f0fdf7 0%, var(--bg) 100%);
     }
     .hero-content {
       max-width: 1200px; margin: 0 auto;
-      display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 60px; align-items: center;
-      position: relative; z-index: 2;
+      display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 50px; align-items: center;
     }
     .hero-text h1 {
-      font-size: clamp(2.8rem, 5vw, 4rem); font-weight: 700;
-      line-height: 1.15; letter-spacing: -0.03em; margin-bottom: 24px;
+      font-size: clamp(2.4rem, 4.5vw, 3.6rem); font-weight: 700;
+      line-height: 1.15; letter-spacing: -0.03em; margin-bottom: 20px;
     }
     .hero-text h1 span {
       background: linear-gradient(90deg, var(--green), var(--teal));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
-    .hero-text p {
-      font-size: 1.2rem; color: var(--text-light); max-width: 480px;
-      margin-bottom: 36px; font-weight: 400;
-    }
-    .hero-buttons { display: flex; gap: 16px; flex-wrap: wrap; }
+    .hero-text p { font-size: 1.1rem; color: var(--text-light); max-width: 460px; margin-bottom: 32px; }
+    .hero-buttons { display: flex; gap: 14px; flex-wrap: wrap; }
     .btn-primary {
       background: var(--green); color: white; border: none;
-      padding: 16px 32px; border-radius: 999px; font-weight: 600; font-size: 1rem;
-      cursor: pointer; transition: all 0.25s ease;
-      display: inline-flex; align-items: center; gap: 8px;
+      padding: 14px 28px; border-radius: 999px; font-weight: 600; font-size: 0.95rem;
+      cursor: pointer; transition: all 0.25s; display: inline-flex; align-items: center; gap: 8px;
     }
-    .btn-primary:hover {
-      background: var(--green-dark); transform: translateY(-2px);
-      box-shadow: 0 10px 30px rgba(0,168,107,0.35);
-    }
+    .btn-primary:hover { background: var(--green-dark); transform: translateY(-2px); box-shadow: 0 10px 28px rgba(0,168,107,0.3); }
     .btn-secondary {
       background: white; color: var(--text); border: 1.5px solid var(--border);
-      padding: 16px 32px; border-radius: 999px; font-weight: 600; font-size: 1rem;
-      cursor: pointer; transition: all 0.25s ease;
+      padding: 14px 28px; border-radius: 999px; font-weight: 600; font-size: 0.95rem;
+      cursor: pointer; transition: all 0.25s;
     }
-    .btn-secondary:hover {
-      border-color: var(--green); color: var(--green); transform: translateY(-2px);
-    }
+    .btn-secondary:hover { border-color: var(--green); color: var(--green); }
     .hero-card {
-      background: white; border-radius: 24px; padding: 32px;
+      background: white; border-radius: 22px; padding: 28px;
       box-shadow: var(--shadow); border: 1px solid var(--border);
-      transform: rotate(2deg); transition: transform 0.4s ease;
     }
-    .hero-card:hover { transform: rotate(0deg) scale(1.02); }
-    .hero-card .points {
-      font-size: 3rem; font-weight: 700; color: var(--green); margin: 12px 0 4px;
-    }
-    .hero-card .label { color: var(--text-light); font-size: 0.9rem; }
-    .impact-row { display: flex; gap: 20px; margin-top: 28px; }
-    .impact-item {
-      flex: 1; background: #f0fdf7; border-radius: 14px; padding: 16px; text-align: center;
-    }
-    .impact-item strong { display: block; font-size: 1.4rem; color: var(--green); }
+    .hero-card .points { font-size: 2.8rem; font-weight: 700; color: var(--green); margin: 8px 0 4px; }
+    .hero-card .label { color: var(--text-light); font-size: 0.88rem; }
+    .impact-row { display: flex; gap: 16px; margin-top: 22px; }
+    .impact-item { flex: 1; background: #f0fdf7; border-radius: 12px; padding: 14px; text-align: center; }
+    .impact-item strong { display: block; font-size: 1.3rem; color: var(--green); }
 
-    /* ========== FEATURES ========== */
-    .section { padding: 100px 32px; max-width: 1200px; margin: 0 auto; }
-    .section-header { text-align: center; margin-bottom: 64px; }
-    .section-header h2 {
-      font-size: 2.5rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 16px;
-    }
-    .section-header p {
-      color: var(--text-light); font-size: 1.15rem; max-width: 560px; margin: 0 auto;
-    }
-    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+    /* SECTIONS */
+    .section { padding: 80px 24px; max-width: 1200px; margin: 0 auto; }
+    .section-header { text-align: center; margin-bottom: 48px; }
+    .section-header h2 { font-size: 2.1rem; font-weight: 700; margin-bottom: 12px; }
+    .section-header p { color: var(--text-light); font-size: 1.05rem; max-width: 520px; margin: 0 auto; }
+    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
     .feature-card {
-      background: white; border-radius: var(--radius); padding: 36px 28px;
-      border: 1px solid var(--border); transition: all 0.3s ease; cursor: default;
+      background: white; border-radius: var(--radius); padding: 28px 24px;
+      border: 1px solid var(--border); transition: all 0.3s;
     }
-    .feature-card:hover {
-      transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.08); border-color: transparent;
-    }
+    .feature-card:hover { transform: translateY(-6px); box-shadow: 0 16px 36px rgba(0,0,0,0.07); }
     .feature-icon {
-      width: 56px; height: 56px; background: linear-gradient(135deg, #e6f9f0, #d0f5ea);
-      border-radius: 14px; display: flex; align-items: center; justify-content: center;
-      font-size: 26px; margin-bottom: 24px;
+      width: 50px; height: 50px; background: linear-gradient(135deg, #e6f9f0, #d0f5ea);
+      border-radius: 12px; display: flex; align-items: center; justify-content: center;
+      font-size: 22px; margin-bottom: 18px;
     }
-    .feature-card h3 { font-size: 1.25rem; font-weight: 600; margin-bottom: 12px; }
-    .feature-card p { color: var(--text-light); font-size: 0.95rem; }
-
-    /* ========== STEPS ========== */
-    .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-top: 48px; }
+    .feature-card h3 { font-size: 1.15rem; font-weight: 600; margin-bottom: 8px; }
+    .feature-card p { color: var(--text-light); font-size: 0.92rem; }
+    .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
     .step { text-align: center; }
     .step-number {
-      width: 48px; height: 48px; background: var(--green); color: white;
+      width: 44px; height: 44px; background: var(--green); color: white;
       border-radius: 50%; display: flex; align-items: center; justify-content: center;
-      font-weight: 700; margin: 0 auto 20px; font-size: 1.1rem;
+      font-weight: 700; margin: 0 auto 14px;
     }
-    .step h4 { font-size: 1.05rem; margin-bottom: 8px; }
-    .step p { color: var(--text-light); font-size: 0.9rem; }
+    .step h4 { font-size: 1rem; margin-bottom: 6px; }
+    .step p { color: var(--text-light); font-size: 0.88rem; }
 
-    /* ========== CTA ========== */
-    .cta-section {
-      background: linear-gradient(135deg, var(--green), var(--teal));
-      border-radius: 28px; padding: 72px 48px; text-align: center; color: white;
-      margin: 40px 32px 100px; max-width: 1200px; margin-left: auto; margin-right: auto;
+    /* DASHBOARD */
+    .dash-header {
+      max-width: 1100px; margin: 0 auto 32px; padding: 0 24px;
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;
     }
-    .cta-section h2 { font-size: 2.4rem; font-weight: 700; margin-bottom: 16px; }
-    .cta-section p { opacity: 0.9; font-size: 1.15rem; margin-bottom: 32px; }
-    .cta-section .btn-primary { background: white; color: var(--green); }
-    .cta-section .btn-primary:hover {
-      background: #f0fdf7; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    .dash-header h1 { font-size: 1.8rem; font-weight: 700; }
+    .dash-header p { color: var(--text-light); font-size: 0.95rem; }
+    .stats-grid {
+      max-width: 1100px; margin: 0 auto 32px; padding: 0 24px;
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px;
+    }
+    .stat-card {
+      background: white; border-radius: 16px; padding: 22px;
+      border: 1px solid var(--border); transition: all 0.25s;
+    }
+    .stat-card:hover { box-shadow: var(--shadow); }
+    .stat-card .stat-label { font-size: 0.85rem; color: var(--text-light); margin-bottom: 6px; }
+    .stat-card .stat-value { font-size: 1.8rem; font-weight: 700; color: var(--green); }
+    .stat-card .stat-sub { font-size: 0.8rem; color: var(--text-light); margin-top: 4px; }
+
+    .dash-grid {
+      max-width: 1100px; margin: 0 auto; padding: 0 24px 60px;
+      display: grid; grid-template-columns: 1.4fr 1fr; gap: 24px;
+    }
+    .card {
+      background: white; border-radius: 18px; border: 1px solid var(--border);
+      padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+    }
+    .card h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
+    .history-item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 0; border-bottom: 1px solid #f0f0f0;
+    }
+    .history-item:last-child { border-bottom: none; }
+    .history-item .hi-left { display: flex; flex-direction: column; gap: 2px; }
+    .history-item .hi-title { font-weight: 500; font-size: 0.95rem; }
+    .history-item .hi-date { font-size: 0.8rem; color: var(--text-light); }
+    .history-item .hi-kg { font-weight: 600; color: var(--green); }
+    .badge {
+      display: inline-block; padding: 3px 10px; border-radius: 999px;
+      font-size: 0.75rem; font-weight: 600;
+    }
+    .badge-success { background: #e6f9f0; color: var(--green); }
+    .badge-pending { background: #fff7e6; color: #d48806; }
+
+    /* FORM */
+    .form-group { margin-bottom: 18px; }
+    .form-group label { display: block; font-weight: 500; font-size: 0.9rem; margin-bottom: 6px; }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%; padding: 12px 14px; border: 1.5px solid var(--border);
+      border-radius: 12px; font-size: 0.95rem; outline: none; transition: border 0.2s;
+      font-family: inherit;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--green); }
+    .materials-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .material-chip {
+      border: 1.5px solid var(--border); border-radius: 12px; padding: 12px;
+      text-align: center; cursor: pointer; transition: all 0.2s; font-size: 0.88rem;
+    }
+    .material-chip:hover { border-color: var(--green); }
+    .material-chip.selected { border-color: var(--green); background: #f0fdf7; color: var(--green); font-weight: 600; }
+    .material-chip span { display: block; font-size: 1.4rem; margin-bottom: 4px; }
+
+    /* QR */
+    .qr-box {
+      text-align: center; padding: 32px;
+    }
+    .qr-code {
+      width: 180px; height: 180px; background: #f0f0f0; border-radius: 16px;
+      margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;
+      font-size: 4rem; border: 2px dashed var(--border);
     }
 
-    /* ========== FOOTER ========== */
-    footer {
-      background: #111; color: #aaa; padding: 60px 32px 40px; text-align: center; font-size: 0.9rem;
+    /* PROFILE */
+    .profile-header {
+      display: flex; align-items: center; gap: 20px; margin-bottom: 28px;
     }
-    footer .logo { color: white; justify-content: center; margin-bottom: 20px; }
+    .profile-header img {
+      width: 72px; height: 72px; border-radius: 50%; border: 3px solid #e6f9f0;
+    }
+    .profile-header h2 { font-size: 1.4rem; }
+    .profile-header p { color: var(--text-light); font-size: 0.9rem; }
 
-    /* ========== CHATBOT ========== */
-    .chat-toggle {
-      position: fixed; bottom: 28px; right: 28px; z-index: 200;
-      width: 64px; height: 64px; border-radius: 50%;
-      background: linear-gradient(135deg, var(--green), var(--teal));
-      color: white; border: none; font-size: 28px; cursor: pointer;
-      box-shadow: 0 8px 30px rgba(0,168,107,0.4);
-      transition: all 0.3s ease; display: flex; align-items: center; justify-content: center;
-    }
-    .chat-toggle:hover { transform: scale(1.08); box-shadow: 0 12px 36px rgba(0,168,107,0.5); }
-    .chat-toggle.open { background: #333; }
-
-    .chat-window {
-      position: fixed; bottom: 108px; right: 28px; z-index: 200;
-      width: 380px; max-width: calc(100vw - 40px); height: 520px;
-      background: white; border-radius: 20px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-      display: flex; flex-direction: column; overflow: hidden;
-      opacity: 0; pointer-events: none; transform: translateY(20px) scale(0.95);
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .chat-window.open {
-      opacity: 1; pointer-events: all; transform: translateY(0) scale(1);
-    }
-
-    .chat-header {
-      background: linear-gradient(135deg, var(--green), var(--teal));
-      color: white; padding: 18px 20px; display: flex; align-items: center; gap: 12px;
-    }
-    .chat-header .avatar {
-      width: 40px; height: 40px; background: rgba(255,255,255,0.2);
-      border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px;
-    }
-    .chat-header h3 { font-size: 1rem; font-weight: 600; }
-    .chat-header p { font-size: 0.75rem; opacity: 0.85; }
-
-    .chat-messages {
-      flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 14px;
-      background: #f8f9fa;
-    }
-    .message {
-      max-width: 85%; padding: 12px 16px; border-radius: 16px; font-size: 0.9rem; line-height: 1.45;
-    }
-    .message.bot {
-      background: white; align-self: flex-start;
-      border-bottom-left-radius: 4px; box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-    }
-    .message.user {
-      background: var(--green); color: white; align-self: flex-end;
-      border-bottom-right-radius: 4px;
-    }
-    .message img {
-      max-width: 100%; border-radius: 10px; margin-top: 8px; display: block;
-    }
-
-    .chat-input-area {
-      padding: 14px 16px; border-top: 1px solid var(--border);
-      display: flex; gap: 10px; align-items: center; background: white;
-    }
-    .chat-input-area input[type="text"] {
-      flex: 1; border: 1.5px solid var(--border); border-radius: 999px;
-      padding: 11px 18px; font-size: 0.9rem; outline: none; transition: border 0.2s;
-    }
-    .chat-input-area input[type="text"]:focus { border-color: var(--green); }
-    .chat-input-area button {
-      width: 42px; height: 42px; border-radius: 50%; border: none;
-      background: var(--green); color: white; cursor: pointer; font-size: 18px;
-      display: flex; align-items: center; justify-content: center; transition: background 0.2s;
-    }
-    .chat-input-area button:hover { background: var(--green-dark); }
-    .photo-btn {
-      background: #f0fdf7 !important; color: var(--green) !important; border: 1.5px solid #d0f5ea !important;
-    }
-    .photo-btn:hover { background: #e6f9f0 !important; }
-
-    /* Login Modal */
+    /* MODAL */
     .modal-overlay {
       position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 300;
       display: flex; align-items: center; justify-content: center;
@@ -294,41 +247,99 @@
     }
     .modal-overlay.open { opacity: 1; pointer-events: all; }
     .modal {
-      background: white; border-radius: 20px; padding: 40px; width: 400px; max-width: 90vw;
-      text-align: center; transform: scale(0.95); transition: transform 0.3s;
+      background: white; border-radius: 20px; padding: 36px; width: 400px; max-width: 92vw;
+      text-align: center; transform: scale(0.95); transition: transform 0.3s; position: relative;
     }
     .modal-overlay.open .modal { transform: scale(1); }
-    .modal h2 { font-size: 1.5rem; margin-bottom: 8px; }
-    .modal p { color: var(--text-light); margin-bottom: 28px; font-size: 0.95rem; }
-    .modal .btn-google { width: 100%; justify-content: center; padding: 14px; font-size: 1rem; margin-bottom: 12px; }
-    .modal .divider {
-      display: flex; align-items: center; gap: 12px; color: #999; font-size: 0.85rem; margin: 20px 0;
-    }
-    .modal .divider::before, .modal .divider::after {
-      content: ''; flex: 1; height: 1px; background: var(--border);
-    }
+    .modal h2 { font-size: 1.4rem; margin-bottom: 6px; }
+    .modal p { color: var(--text-light); margin-bottom: 24px; font-size: 0.92rem; }
+    .modal .btn-google { width: 100%; justify-content: center; padding: 13px; margin-bottom: 12px; }
+    .modal .divider { display: flex; align-items: center; gap: 12px; color: #999; font-size: 0.85rem; margin: 16px 0; }
+    .modal .divider::before, .modal .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
     .modal input {
-      width: 100%; padding: 12px 16px; border: 1.5px solid var(--border);
-      border-radius: 10px; margin-bottom: 12px; font-size: 0.95rem; outline: none;
+      width: 100%; padding: 12px 14px; border: 1.5px solid var(--border);
+      border-radius: 10px; margin-bottom: 10px; font-size: 0.95rem; outline: none;
     }
     .modal input:focus { border-color: var(--green); }
     .close-modal {
-      position: absolute; top: 16px; right: 16px; background: none; border: none;
-      font-size: 24px; cursor: pointer; color: #999;
+      position: absolute; top: 14px; right: 14px; background: none; border: none;
+      font-size: 22px; cursor: pointer; color: #999;
     }
 
-    /* User logged state */
-    .user-chip {
-      display: none; align-items: center; gap: 8px;
-      background: #f0fdf7; padding: 6px 14px 6px 6px; border-radius: 999px;
-      font-size: 0.85rem; font-weight: 500;
+    /* CHATBOT */
+    .chat-toggle {
+      position: fixed; bottom: 24px; right: 24px; z-index: 200;
+      width: 60px; height: 60px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--green), var(--teal));
+      color: white; border: none; font-size: 26px; cursor: pointer;
+      box-shadow: 0 8px 28px rgba(0,168,107,0.4);
+      transition: all 0.3s; display: flex; align-items: center; justify-content: center;
     }
-    .user-chip img {
-      width: 28px; height: 28px; border-radius: 50%;
+    .chat-toggle:hover { transform: scale(1.07); }
+    .chat-toggle.open { background: #333; }
+    .chat-window {
+      position: fixed; bottom: 96px; right: 24px; z-index: 200;
+      width: 370px; max-width: calc(100vw - 32px); height: 500px;
+      background: white; border-radius: 18px;
+      box-shadow: 0 18px 50px rgba(0,0,0,0.15);
+      display: flex; flex-direction: column; overflow: hidden;
+      opacity: 0; pointer-events: none; transform: translateY(16px) scale(0.96);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .user-chip.visible { display: flex; }
+    .chat-window.open { opacity: 1; pointer-events: all; transform: translateY(0) scale(1); }
+    .chat-header {
+      background: linear-gradient(135deg, var(--green), var(--teal));
+      color: white; padding: 16px 18px; display: flex; align-items: center; gap: 12px;
+    }
+    .chat-header .avatar {
+      width: 38px; height: 38px; background: rgba(255,255,255,0.2);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px;
+    }
+    .chat-header h3 { font-size: 0.95rem; font-weight: 600; }
+    .chat-header p { font-size: 0.72rem; opacity: 0.85; }
+    .chat-messages {
+      flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px;
+      background: #f8f9fa;
+    }
+    .message {
+      max-width: 85%; padding: 11px 14px; border-radius: 14px; font-size: 0.88rem; line-height: 1.45;
+    }
+    .message.bot {
+      background: white; align-self: flex-start;
+      border-bottom-left-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .message.user {
+      background: var(--green); color: white; align-self: flex-end;
+      border-bottom-right-radius: 4px;
+    }
+    .message img { max-width: 100%; border-radius: 8px; margin-top: 6px; display: block; }
+    .chat-input-area {
+      padding: 12px 14px; border-top: 1px solid var(--border);
+      display: flex; gap: 8px; align-items: center; background: white;
+    }
+    .chat-input-area input[type="text"] {
+      flex: 1; border: 1.5px solid var(--border); border-radius: 999px;
+      padding: 10px 16px; font-size: 0.88rem; outline: none;
+    }
+    .chat-input-area input[type="text"]:focus { border-color: var(--green); }
+    .chat-input-area button {
+      width: 40px; height: 40px; border-radius: 50%; border: none;
+      background: var(--green); color: white; cursor: pointer; font-size: 16px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .photo-btn { background: #f0fdf7 !important; color: var(--green) !important; }
 
-    /* Responsive */
+    /* FOOTER */
+    footer {
+      background: #111; color: #aaa; padding: 48px 24px 32px; text-align: center; font-size: 0.88rem;
+    }
+    footer .logo { color: white; justify-content: center; margin-bottom: 14px; }
+
+    /* EMPTY STATE */
+    .empty-state { text-align: center; padding: 40px 20px; color: var(--text-light); }
+    .empty-state .icon { font-size: 2.5rem; margin-bottom: 12px; }
+
+    /* RESPONSIVE */
     @media (max-width: 900px) {
       .hero-content { grid-template-columns: 1fr; text-align: center; }
       .hero-text p { margin-left: auto; margin-right: auto; }
@@ -336,17 +347,22 @@
       .features-grid { grid-template-columns: 1fr; }
       .steps { grid-template-columns: 1fr 1fr; }
       .nav-links { display: none; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .dash-grid { grid-template-columns: 1fr; }
+      .materials-grid { grid-template-columns: 1fr 1fr; }
     }
     @media (max-width: 600px) {
       .steps { grid-template-columns: 1fr; }
-      .chat-window { right: 12px; bottom: 90px; width: calc(100vw - 24px); height: 70vh; }
+      .stats-grid { grid-template-columns: 1fr; }
     }
 
-    .reveal {
-      opacity: 0; transform: translateY(30px);
-      transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    .toast {
+      position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+      background: #111; color: white; padding: 14px 26px; border-radius: 999px;
+      font-size: 0.9rem; z-index: 999; box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+      opacity: 0; transition: opacity 0.3s;
     }
-    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .toast.show { opacity: 1; }
   </style>
 </head>
 <body>
@@ -354,17 +370,19 @@
   <!-- NAV -->
   <nav id="navbar">
     <div class="nav-inner">
-      <a href="#" class="logo">
+      <a href="#" class="logo" onclick="showPage('home')">
         <div class="logo-icon">♻</div>
         Ruta Circular
       </a>
-      <ul class="nav-links">
-        <li><a href="#como-funciona">Cómo funciona</a></li>
-        <li><a href="#beneficios">Beneficios</a></li>
-        <li><a href="#impacto">Impacto</a></li>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#" onclick="showPage('home')">Inicio</a></li>
+        <li><a href="#" onclick="showPage('dashboard')" id="navDash" style="display:none">Mi panel</a></li>
+        <li><a href="#" onclick="showPage('solicitar')" id="navSolicitar" style="display:none">Solicitar</a></li>
+        <li><a href="#" onclick="showPage('historial')" id="navHistorial" style="display:none">Historial</a></li>
+        <li><a href="#" onclick="showPage('perfil')" id="navPerfil" style="display:none">Perfil</a></li>
       </ul>
       <div class="nav-actions">
-        <div class="user-chip" id="userChip">
+        <div class="user-chip" id="userChip" onclick="showPage('perfil')">
           <img id="userAvatar" src="" alt="Usuario">
           <span id="userName">Usuario</span>
         </div>
@@ -373,149 +391,297 @@
           Continuar con Google
         </button>
         <button class="nav-cta" id="btnLogin" onclick="openLoginModal()">Iniciar sesión</button>
+        <button class="nav-cta" id="btnLogout" style="display:none; background:#eee; color:#333;" onclick="logout()">Salir</button>
       </div>
     </div>
   </nav>
 
-  <!-- HERO -->
-  <section class="hero">
-    <div class="hero-content">
-      <div class="hero-text">
-        <h1>Recicla fácil,<br><span>gana puntos</span><br>y ve tu impacto</h1>
-        <p>Conectamos hogares, restaurantes y comercios con recicladores de forma simple, confiable y motivadora.</p>
-        <div class="hero-buttons">
-          <button class="btn-primary" onclick="document.getElementById('solicitar').scrollIntoView({behavior:'smooth'})">
-            Solicitar recolección →
-          </button>
-          <button class="btn-secondary">Soy reciclador</button>
+  <!-- ==================== HOME ==================== -->
+  <div id="page-home" class="page active">
+    <section class="hero">
+      <div class="hero-content">
+        <div class="hero-text">
+          <h1>Recicla fácil,<br><span>gana puntos</span><br>y ve tu impacto</h1>
+          <p>Conectamos hogares, restaurantes y comercios con recicladores de forma simple, confiable y motivadora.</p>
+          <div class="hero-buttons">
+            <button class="btn-primary" onclick="requireLogin('solicitar')">Solicitar recolección →</button>
+            <button class="btn-secondary" onclick="requireLogin('dashboard')">Ver mi panel</button>
+          </div>
         </div>
-      </div>
-      <div class="hero-visual">
-        <div class="hero-card">
-          <div class="label">Tus puntos acumulados</div>
-          <div class="points">1.240</div>
-          <div class="label">¡Sigue así! Cada kilo cuenta</div>
-          <div class="impact-row">
-            <div class="impact-item">
-              <strong>48 kg</strong>
-              <span style="font-size:0.8rem;color:#5f6368">Reciclados</span>
-            </div>
-            <div class="impact-item">
-              <strong>32 kg</strong>
-              <span style="font-size:0.8rem;color:#5f6368">CO₂ evitado</span>
+        <div class="hero-visual">
+          <div class="hero-card">
+            <div class="label">Tus puntos acumulados</div>
+            <div class="points" id="heroPoints">0</div>
+            <div class="label">¡Empieza a reciclar hoy!</div>
+            <div class="impact-row">
+              <div class="impact-item">
+                <strong id="heroKg">0 kg</strong>
+                <span style="font-size:0.8rem;color:#5f6368">Reciclados</span>
+              </div>
+              <div class="impact-item">
+                <strong id="heroCo2">0 kg</strong>
+                <span style="font-size:0.8rem;color:#5f6368">CO₂ evitado</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- FEATURES -->
-  <section class="section" id="beneficios">
-    <div class="section-header reveal">
-      <h2>Todo lo que necesitas para reciclar mejor</h2>
-      <p>Diseñado para que reciclar sea tan simple como pedir un domicilio.</p>
-    </div>
-    <div class="features-grid">
-      <div class="feature-card reveal">
-        <div class="feature-icon">📅</div>
-        <h3>Agenda de recolección</h3>
-        <p>Programa el retiro de tus materiales el día y hora que más te convenga. Sin complicaciones.</p>
+    <section class="section">
+      <div class="section-header">
+        <h2>Todo lo que necesitas para reciclar mejor</h2>
+        <p>Diseñado para que reciclar sea tan simple como pedir un domicilio.</p>
       </div>
-      <div class="feature-card reveal">
-        <div class="feature-icon">⭐</div>
-        <h3>Puntos por kilos</h3>
-        <p>Gana puntos por cada kilo reciclado y canjéalos por beneficios y descuentos reales.</p>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">📅</div>
+          <h3>Agenda de recolección</h3>
+          <p>Programa el retiro de tus materiales el día y hora que más te convenga.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">⭐</div>
+          <h3>Puntos por kilos</h3>
+          <p>Gana puntos por cada kilo reciclado y canjéalos por beneficios reales.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📊</div>
+          <h3>Tablero de impacto</h3>
+          <p>Visualiza cuántos kilos has recuperado y cuánto CO₂ has evitado.</p>
+        </div>
       </div>
-      <div class="feature-card reveal">
-        <div class="feature-icon">📊</div>
-        <h3>Tablero de impacto</h3>
-        <p>Visualiza en tiempo real cuántos kilos has recuperado y cuánto CO₂ has evitado.</p>
-      </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- HOW IT WORKS -->
-  <section class="section" id="como-funciona" style="background:#fff; max-width:100%; padding:100px 32px;">
-    <div style="max-width:1200px; margin:0 auto;">
-      <div class="section-header reveal">
-        <h2>Así de simple funciona</h2>
-        <p>Cuatro pasos para cerrar el ciclo de tus materiales.</p>
-      </div>
-      <div class="steps">
-        <div class="step reveal">
-          <div class="step-number">1</div>
-          <h4>Regístrate</h4>
-          <p>Crea tu cuenta en menos de un minuto</p>
+    <section class="section" style="background:#fff; max-width:100%;">
+      <div style="max-width:1200px; margin:0 auto;">
+        <div class="section-header">
+          <h2>Así de simple funciona</h2>
+          <p>Cuatro pasos para cerrar el ciclo de tus materiales.</p>
         </div>
-        <div class="step reveal">
-          <div class="step-number">2</div>
-          <h4>Agenda</h4>
-          <p>Elige materiales, fecha y hora</p>
-        </div>
-        <div class="step reveal">
-          <div class="step-number">3</div>
-          <h4>Entrega</h4>
-          <p>Muestra el QR al reciclador</p>
-        </div>
-        <div class="step reveal">
-          <div class="step-number">4</div>
-          <h4>Impacta</h4>
-          <p>Acumula puntos y ve tu huella positiva</p>
+        <div class="steps">
+          <div class="step"><div class="step-number">1</div><h4>Regístrate</h4><p>Crea tu cuenta en menos de un minuto</p></div>
+          <div class="step"><div class="step-number">2</div><h4>Agenda</h4><p>Elige materiales, fecha y hora</p></div>
+          <div class="step"><div class="step-number">3</div><h4>Entrega</h4><p>Muestra el QR al reciclador</p></div>
+          <div class="step"><div class="step-number">4</div><h4>Impacta</h4><p>Acumula puntos y ve tu huella positiva</p></div>
         </div>
       </div>
-    </div>
-  </section>
-
-  <!-- CTA -->
-  <div class="cta-section reveal" id="solicitar">
-    <h2>¿Listo para empezar a reciclar con impacto?</h2>
-    <p>Únete a cientos de hogares y comercios que ya están cerrando el ciclo.</p>
-    <button class="btn-primary" onclick="openLoginModal()">Crear mi cuenta gratis</button>
+    </section>
   </div>
 
-  <footer>
-    <div class="logo">
-      <div class="logo-icon">♻</div>
-      Ruta Circular
+  <!-- ==================== DASHBOARD ==================== -->
+  <div id="page-dashboard" class="page">
+    <div class="dash-header">
+      <div>
+        <h1>Hola, <span id="dashName">Usuario</span> 👋</h1>
+        <p>Este es tu resumen de impacto circular</p>
+      </div>
+      <button class="btn-primary" onclick="showPage('solicitar')">+ Nueva recolección</button>
     </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Puntos acumulados</div>
+        <div class="stat-value" id="statPoints">0</div>
+        <div class="stat-sub">Canjeables por beneficios</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Kilos reciclados</div>
+        <div class="stat-value" id="statKg">0</div>
+        <div class="stat-sub">Material aprovechable</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">CO₂ evitado</div>
+        <div class="stat-value" id="statCo2">0 kg</div>
+        <div class="stat-sub">Huella positiva</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Recolecciones</div>
+        <div class="stat-value" id="statCount">0</div>
+        <div class="stat-sub">Solicitudes realizadas</div>
+      </div>
+    </div>
+
+    <div class="dash-grid">
+      <div class="card">
+        <h3>📋 Últimas recolecciones</h3>
+        <div id="dashHistory">
+          <div class="empty-state">
+            <div class="icon">📦</div>
+            <p>Aún no tienes recolecciones.<br>¡Agenda tu primera!</p>
+            <button class="btn-primary" style="margin-top:16px;" onclick="showPage('solicitar')">Solicitar ahora</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>🌱 Tu impacto</h3>
+        <div style="margin-bottom:20px;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+            <span style="font-size:0.9rem;">Progreso del mes</span>
+            <span style="font-size:0.9rem; font-weight:600; color:var(--green);" id="progressText">0 / 20 kg</span>
+          </div>
+          <div style="height:10px; background:#eee; border-radius:99px; overflow:hidden;">
+            <div id="progressBar" style="height:100%; width:0%; background:linear-gradient(90deg,var(--green),var(--teal)); border-radius:99px; transition:width 0.5s;"></div>
+          </div>
+        </div>
+        <p style="font-size:0.9rem; color:var(--text-light); line-height:1.5;">
+          Cada kilo de material aprovechable que entregas ayuda a reducir la basura en rellenos sanitarios y genera ingresos para recicladores de oficio.
+        </p>
+        <button class="btn-secondary" style="width:100%; margin-top:18px;" onclick="showPage('historial')">Ver historial completo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SOLICITAR ==================== -->
+  <div id="page-solicitar" class="page">
+    <div class="dash-header">
+      <div>
+        <h1>Solicitar recolección</h1>
+        <p>Elige los materiales y agenda el retiro</p>
+      </div>
+    </div>
+
+    <div style="max-width:600px; margin:0 auto; padding:0 24px 60px;">
+      <div class="card">
+        <div class="form-group">
+          <label>¿Qué materiales vas a entregar?</label>
+          <div class="materials-grid" id="materialsGrid">
+            <div class="material-chip" data-mat="Plástico" onclick="toggleMaterial(this)"><span>🧴</span>Plástico</div>
+            <div class="material-chip" data-mat="Cartón" onclick="toggleMaterial(this)"><span>📦</span>Cartón</div>
+            <div class="material-chip" data-mat="Papel" onclick="toggleMaterial(this)"><span>📄</span>Papel</div>
+            <div class="material-chip" data-mat="Vidrio" onclick="toggleMaterial(this)"><span>🫙</span>Vidrio</div>
+            <div class="material-chip" data-mat="Metal" onclick="toggleMaterial(this)"><span>🥫</span>Metal</div>
+            <div class="material-chip" data-mat="Otros" onclick="toggleMaterial(this)"><span>♻️</span>Otros</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Kilos aproximados</label>
+          <input type="number" id="inputKg" placeholder="Ej: 5" min="1" max="100" value="3">
+        </div>
+
+        <div class="form-group">
+          <label>Fecha de recolección</label>
+          <input type="date" id="inputFecha">
+        </div>
+
+        <div class="form-group">
+          <label>Franja horaria</label>
+          <select id="inputHora">
+            <option value="Mañana (8am - 12pm)">Mañana (8am - 12pm)</option>
+            <option value="Tarde (12pm - 5pm)">Tarde (12pm - 5pm)</option>
+            <option value="Noche (5pm - 8pm)">Noche (5pm - 8pm)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Dirección</label>
+          <input type="text" id="inputDireccion" placeholder="Calle, número, barrio, ciudad">
+        </div>
+
+        <div class="form-group">
+          <label>Notas adicionales (opcional)</label>
+          <textarea id="inputNotas" rows="2" placeholder="Ej: Timbre dañado, dejar con el portero..."></textarea>
+        </div>
+
+        <button class="btn-primary" style="width:100%; padding:16px; font-size:1rem;" onclick="submitRecoleccion()">
+          Confirmar solicitud →
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== CONFIRMACIÓN + QR ==================== -->
+  <div id="page-confirmacion" class="page">
+    <div style="max-width:480px; margin:0 auto; padding:40px 24px 60px;">
+      <div class="card qr-box">
+        <div style="font-size:3rem; margin-bottom:12px;">✅</div>
+        <h2 style="margin-bottom:8px;">¡Solicitud creada!</h2>
+        <p style="color:var(--text-light); margin-bottom:24px;">Muestra este código QR al reciclador cuando llegue</p>
+        
+        <div class="qr-code" id="qrCode">📱</div>
+        
+        <p style="font-weight:600; font-size:1.1rem; margin-bottom:4px;" id="confirmCode">RC-000000</p>
+        <p style="font-size:0.88rem; color:var(--text-light); margin-bottom:24px;" id="confirmDetails">—</p>
+        
+        <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+          <button class="btn-primary" onclick="showPage('dashboard')">Ir a mi panel</button>
+          <button class="btn-secondary" onclick="showPage('historial')">Ver historial</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== HISTORIAL ==================== -->
+  <div id="page-historial" class="page">
+    <div class="dash-header">
+      <div>
+        <h1>Historial de recolecciones</h1>
+        <p>Todas tus entregas y su estado</p>
+      </div>
+      <button class="btn-primary" onclick="showPage('solicitar')">+ Nueva</button>
+    </div>
+
+    <div style="max-width:700px; margin:0 auto; padding:0 24px 60px;">
+      <div class="card">
+        <div id="fullHistory">
+          <div class="empty-state">
+            <div class="icon">📋</div>
+            <p>Aún no tienes historial de recolecciones.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== PERFIL ==================== -->
+  <div id="page-perfil" class="page">
+    <div class="dash-header">
+      <div>
+        <h1>Mi perfil</h1>
+        <p>Tu información y estadísticas</p>
+      </div>
+    </div>
+
+    <div style="max-width:600px; margin:0 auto; padding:0 24px 60px;">
+      <div class="card">
+        <div class="profile-header">
+          <img id="perfilAvatar" src="" alt="Avatar">
+          <div>
+            <h2 id="perfilNombre">Usuario</h2>
+            <p id="perfilEmail">correo@email.com</p>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:24px;">
+          <div style="background:#f0fdf7; border-radius:12px; padding:16px; text-align:center;">
+            <div style="font-size:1.5rem; font-weight:700; color:var(--green);" id="perfilPuntos">0</div>
+            <div style="font-size:0.8rem; color:var(--text-light);">Puntos</div>
+          </div>
+          <div style="background:#f0fdf7; border-radius:12px; padding:16px; text-align:center;">
+            <div style="font-size:1.5rem; font-weight:700; color:var(--green);" id="perfilKg">0 kg</div>
+            <div style="font-size:0.8rem; color:var(--text-light);">Reciclados</div>
+          </div>
+        </div>
+
+        <button class="btn-secondary" style="width:100%; margin-bottom:10px;" onclick="showPage('dashboard')">Ver mi panel</button>
+        <button class="btn-secondary" style="width:100%; color:#c0392b; border-color:#f5c6cb;" onclick="logout()">Cerrar sesión</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="logo"><div class="logo-icon">♻</div> Ruta Circular</div>
     <p>Economía circular • Optimización logística • Impacto real</p>
-    <p style="margin-top:12px; opacity:0.6;">Proyecto académico Digital Business — 2026</p>
+    <p style="margin-top:10px; opacity:0.6;">Proyecto académico Digital Business — 2026</p>
   </footer>
 
-  <!-- ========== CHATBOT ========== -->
-  <button class="chat-toggle" id="chatToggle" onclick="toggleChat()">💬</button>
-
-  <div class="chat-window" id="chatWindow">
-    <div class="chat-header">
-      <div class="avatar">🤖</div>
-      <div>
-        <h3>Asistente Circular</h3>
-        <p>Te ayudo a identificar qué es aprovechable</p>
-      </div>
-    </div>
-    <div class="chat-messages" id="chatMessages">
-      <div class="message bot">
-        ¡Hola! 👋 Soy el Asistente de Ruta Circular.<br><br>
-        Puedo ayudarte a saber si algo es <strong>aprovechable</strong> según la normativa colombiana de separación en la fuente.<br><br>
-        📸 <strong>Envíame una foto</strong> del material o descríbemelo por texto.
-      </div>
-    </div>
-    <div class="chat-input-area">
-      <button class="photo-btn" onclick="document.getElementById('photoInput').click()" title="Subir foto">📷</button>
-      <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="handlePhoto(event)">
-      <input type="text" id="chatInput" placeholder="Escribe o sube una foto..." onkeypress="if(event.key==='Enter')sendMessage()">
-      <button onclick="sendMessage()">➤</button>
-    </div>
-  </div>
-
-  <!-- ========== LOGIN MODAL ========== -->
+  <!-- LOGIN MODAL -->
   <div class="modal-overlay" id="loginModal">
-    <div class="modal" style="position:relative">
+    <div class="modal">
       <button class="close-modal" onclick="closeLoginModal()">×</button>
-      <div class="logo" style="justify-content:center; margin-bottom:20px;">
-        <div class="logo-icon">♻</div>
-        Ruta Circular
+      <div class="logo" style="justify-content:center; margin-bottom:18px;">
+        <div class="logo-icon">♻</div> Ruta Circular
       </div>
       <h2>Bienvenido</h2>
       <p>Inicia sesión para agendar recolecciones y acumular puntos</p>
@@ -527,130 +693,171 @@
 
       <div class="divider">o</div>
 
-      <input type="email" placeholder="Correo electrónico" id="emailInput" required>
-      <input type="password" placeholder="Contraseña" id="passInput" required>
-      <button class="btn-primary" id="btnEmailLogin" style="width:100%; margin-top:8px;" onclick="simulateEmailLogin()">
-        Iniciar sesión
-      </button>
-      <p style="margin-top:16px; font-size:0.85rem; color:#888;">
-        ¿No tienes cuenta? <a href="#" onclick="simulateEmailLogin()" style="color:var(--green); font-weight:600;">Regístrate gratis</a>
-      </p>
+      <input type="email" placeholder="Correo electrónico" id="emailInput">
+      <input type="password" placeholder="Contraseña" id="passInput">
+      <button class="btn-primary" id="btnEmailLogin" style="width:100%; margin-top:6px;" onclick="simulateEmailLogin()">Iniciar sesión</button>
     </div>
   </div>
 
-  <!-- ========== GOOGLE ACCOUNT SELECTOR (simulado realista) ========== -->
-  <div class="modal-overlay" id="googleAccountsModal">
-    <div class="modal" style="position:relative; max-width:420px; padding:0; overflow:hidden; text-align:left;">
-      <div style="padding:24px 24px 16px; border-bottom:1px solid #eee; display:flex; align-items:center; gap:12px;">
-        <svg width="24" height="24" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-        <div>
-          <div style="font-size:1.05rem; font-weight:600; color:#202124;">Elige una cuenta</div>
-          <div style="font-size:0.85rem; color:#5f6368;">para continuar a Ruta Circular</div>
-        </div>
-      </div>
-
-      <div style="padding:8px 0;">
-        <!-- Cuenta 1 -->
-        <div class="google-account" onclick="selectGoogleAccount('Camila Rodríguez', 'camila.rodriguez@gmail.com')" style="display:flex; align-items:center; gap:16px; padding:12px 24px; cursor:pointer; transition:background 0.15s;">
-          <img src="https://ui-avatars.com/api/?name=Camila+Rodriguez&background=7c3aed&color=fff&size=64" style="width:40px; height:40px; border-radius:50%;" alt="">
-          <div style="flex:1;">
-            <div style="font-weight:500; font-size:0.95rem; color:#202124;">Camila Rodríguez</div>
-            <div style="font-size:0.85rem; color:#5f6368;">camila.rodriguez@gmail.com</div>
-          </div>
-        </div>
-
-        <!-- Cuenta 2 -->
-        <div class="google-account" onclick="selectGoogleAccount('Andrés Gómez', 'andres.gomez@gmail.com')" style="display:flex; align-items:center; gap:16px; padding:12px 24px; cursor:pointer; transition:background 0.15s;">
-          <img src="https://ui-avatars.com/api/?name=Andres+Gomez&background=2563eb&color=fff&size=64" style="width:40px; height:40px; border-radius:50%;" alt="">
-          <div style="flex:1;">
-            <div style="font-weight:500; font-size:0.95rem; color:#202124;">Andrés Gómez</div>
-            <div style="font-size:0.85rem; color:#5f6368;">andres.gomez@gmail.com</div>
-          </div>
-        </div>
-
-        <!-- Cuenta 3 -->
-        <div class="google-account" onclick="selectGoogleAccount('Laura Martínez', 'laura.martinez@gmail.com')" style="display:flex; align-items:center; gap:16px; padding:12px 24px; cursor:pointer; transition:background 0.15s;">
-          <img src="https://ui-avatars.com/api/?name=Laura+Martinez&background=db2777&color=fff&size=64" style="width:40px; height:40px; border-radius:50%;" alt="">
-          <div style="flex:1;">
-            <div style="font-weight:500; font-size:0.95rem; color:#202124;">Laura Martínez</div>
-            <div style="font-size:0.85rem; color:#5f6368;">laura.martinez@gmail.com</div>
-          </div>
-        </div>
-
-        <!-- Usar otra cuenta -->
-        <div class="google-account" onclick="selectGoogleAccount('Otra cuenta', 'usuario@gmail.com')" style="display:flex; align-items:center; gap:16px; padding:12px 24px; cursor:pointer; transition:background 0.15s; border-top:1px solid #eee; margin-top:4px;">
-          <div style="width:40px; height:40px; border-radius:50%; background:#f1f3f4; display:flex; align-items:center; justify-content:center; font-size:20px;">👤</div>
-          <div style="flex:1;">
-            <div style="font-weight:500; font-size:0.95rem; color:#202124;">Usar otra cuenta</div>
-          </div>
-        </div>
-      </div>
-
-      <div style="padding:16px 24px 20px; font-size:0.75rem; color:#5f6368; line-height:1.4; border-top:1px solid #eee;">
-        Para continuar, Google compartirá tu nombre, dirección de correo electrónico y foto de perfil con Ruta Circular.
+  <!-- CHATBOT -->
+  <button class="chat-toggle" id="chatToggle" onclick="toggleChat()">💬</button>
+  <div class="chat-window" id="chatWindow">
+    <div class="chat-header">
+      <div class="avatar">🤖</div>
+      <div>
+        <h3>Asistente Circular</h3>
+        <p>Te ayudo a identificar qué es aprovechable</p>
       </div>
     </div>
+    <div class="chat-messages" id="chatMessages">
+      <div class="message bot">
+        ¡Hola! 👋 Soy el Asistente de Ruta Circular.<br><br>
+        Puedo ayudarte a saber si algo es <strong>aprovechable</strong> según la normativa colombiana.<br><br>
+        📸 Envíame una foto o descríbemelo por texto.
+      </div>
+    </div>
+    <div class="chat-input-area">
+      <button class="photo-btn" onclick="document.getElementById('photoInput').click()" title="Subir foto">📷</button>
+      <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="handlePhoto(event)">
+      <input type="text" id="chatInput" placeholder="Escribe o sube una foto..." onkeypress="if(event.key==='Enter')sendMessage()">
+      <button onclick="sendMessage()">➤</button>
+    </div>
   </div>
+
+  <div class="toast" id="toast"></div>
 
   <script>
-    // ===== NAVBAR =====
-    const navbar = document.getElementById('navbar');
-    window.addEventListener('scroll', () => {
-      navbar.classList.toggle('scrolled', window.scrollY > 40);
-    });
+    // ========== STATE ==========
+    let currentUser = null;
+    let selectedMaterials = [];
+    const GOOGLE_CLIENT_ID = '1007467540717-emdpnoc49v46c6j783itp1v60idjmah7.apps.googleusercontent.com';
 
-    // ===== REVEAL =====
-    const reveals = document.querySelectorAll('.reveal');
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-    }, { threshold: 0.15 });
-    reveals.forEach(el => observer.observe(el));
+    // ========== NAV & PAGES ==========
+    function showPage(name) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      const page = document.getElementById('page-' + name);
+      if (page) page.classList.add('active');
+      window.scrollTo(0, 0);
+      if (name === 'dashboard' || name === 'historial' || name === 'perfil') updateUI();
+    }
 
-    // ===== LOGIN =====
+    function requireLogin(page) {
+      if (!currentUser) {
+        openLoginModal();
+        return;
+      }
+      showPage(page);
+    }
+
+    // ========== USER DATA (localStorage) ==========
+    function getUserData() {
+      if (!currentUser) return null;
+      const key = 'rutaData_' + (currentUser.email || currentUser.name);
+      let data = localStorage.getItem(key);
+      if (!data) {
+        data = JSON.stringify({ points: 0, kg: 0, co2: 0, history: [] });
+        localStorage.setItem(key, data);
+      }
+      return JSON.parse(data);
+    }
+
+    function saveUserData(data) {
+      if (!currentUser) return;
+      const key = 'rutaData_' + (currentUser.email || currentUser.name);
+      localStorage.setItem(key, JSON.stringify(data));
+    }
+
+    // ========== LOGIN ==========
     function openLoginModal() {
       document.getElementById('loginModal').classList.add('open');
-      // Focus on email field
-      setTimeout(() => document.getElementById('emailInput').focus(), 300);
     }
     function closeLoginModal() {
       document.getElementById('loginModal').classList.remove('open');
     }
 
-    function loginSuccess(name, avatarUrl) {
+    function loginSuccess(name, avatar, email) {
+      currentUser = { name, avatar, email: email || (name.toLowerCase() + '@email.com') };
+      localStorage.setItem('rutaUser', JSON.stringify(currentUser));
+
       document.getElementById('userName').textContent = name;
-      document.getElementById('userAvatar').src = avatarUrl;
+      document.getElementById('userAvatar').src = avatar;
       document.getElementById('userChip').classList.add('visible');
       document.getElementById('btnGoogleNav').style.display = 'none';
       document.getElementById('btnLogin').style.display = 'none';
+      document.getElementById('btnLogout').style.display = 'inline-block';
+
+      // Show logged-in nav
+      ['navDash','navSolicitar','navHistorial','navPerfil'].forEach(id => {
+        document.getElementById(id).style.display = 'inline';
+      });
+
       closeLoginModal();
-      showToast('¡Bienvenido/a ' + name + '! Sesión iniciada correctamente');
+      updateUI();
+      showPage('dashboard');
+      showToast('¡Bienvenido/a ' + name + '!');
     }
 
-    // ===== REAL GOOGLE LOGIN =====
-    const GOOGLE_CLIENT_ID = '1007467540717-emdpnoc49v46c6j783itp1v60idjmah7.apps.googleusercontent.com';
+    function logout() {
+      currentUser = null;
+      localStorage.removeItem('rutaUser');
+      document.getElementById('userChip').classList.remove('visible');
+      document.getElementById('btnGoogleNav').style.display = 'flex';
+      document.getElementById('btnLogin').style.display = 'inline-block';
+      document.getElementById('btnLogout').style.display = 'none';
+      ['navDash','navSolicitar','navHistorial','navPerfil'].forEach(id => {
+        document.getElementById(id).style.display = 'none';
+      });
+      showPage('home');
+      showToast('Sesión cerrada');
+    }
 
+    function simulateEmailLogin() {
+      const email = document.getElementById('emailInput').value.trim();
+      const password = document.getElementById('passInput').value;
+      if (!email || !email.includes('@')) { alert('Escribe un correo válido'); return; }
+      if (!password || password.length < 4) { alert('La contraseña debe tener al menos 4 caracteres'); return; }
+
+      const btn = document.getElementById('btnEmailLogin');
+      btn.textContent = 'Iniciando...';
+      btn.disabled = true;
+
+      setTimeout(() => {
+        let name = email.split('@')[0];
+        name = name.charAt(0).toUpperCase() + name.slice(1);
+        const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=00a86b&color=fff&size=128`;
+        loginSuccess(name, avatar, email);
+        btn.textContent = 'Iniciar sesión';
+        btn.disabled = false;
+      }, 800);
+    }
+
+    // Google Login
     function startGoogleLogin() {
-      // Cerrar modal de login si está abierto
       closeLoginModal();
-
-      // Usar Google Identity Services (One Tap / Popup)
+      if (typeof google === 'undefined' || !google.accounts) {
+        // Fallback si no carga el script
+        const name = 'Usuario Google';
+        const avatar = 'https://ui-avatars.com/api/?name=Usuario&background=00a86b&color=fff&size=128';
+        loginSuccess(name, avatar, 'usuario@gmail.com');
+        return;
+      }
       google.accounts.id.initialize({
         client_id: GOOGLE_CLIENT_ID,
         callback: handleGoogleCredentialResponse,
-        auto_select: false,
-        cancel_on_tap_outside: true
+        auto_select: false
       });
-
-      // Mostrar el selector de cuentas de Google
       google.accounts.id.prompt((notification) => {
         if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-          // Si One Tap no se muestra, usamos el botón de popup
           google.accounts.oauth2.initTokenClient({
             client_id: GOOGLE_CLIENT_ID,
             scope: 'email profile openid',
             callback: (tokenResponse) => {
               if (tokenResponse && tokenResponse.access_token) {
-                fetchUserInfo(tokenResponse.access_token);
+                fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                  headers: { Authorization: 'Bearer ' + tokenResponse.access_token }
+                }).then(r => r.json()).then(data => {
+                  loginSuccess(data.given_name || data.name.split(' ')[0], data.picture, data.email);
+                });
               }
             }
           }).requestAccessToken();
@@ -659,135 +866,148 @@
     }
 
     function handleGoogleCredentialResponse(response) {
-      // Decodificar el JWT para obtener los datos del usuario
       const data = parseJwt(response.credential);
-      const name = data.given_name || data.name.split(' ')[0];
-      const avatar = data.picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name)}&background=00a86b&color=fff&size=128`;
-      
-      loginSuccess(name, avatar);
-      
-      // Guardar en localStorage para que persista
-      localStorage.setItem('rutaUser', JSON.stringify({
-        name: name,
-        fullName: data.name,
-        email: data.email,
-        picture: avatar
-      }));
+      loginSuccess(data.given_name || data.name.split(' ')[0], data.picture, data.email);
     }
 
-    function fetchUserInfo(accessToken) {
-      fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-        headers: { Authorization: `Bearer ${accessToken}` }
-      })
-      .then(res => res.json())
-      .then(data => {
-        const name = data.given_name || data.name.split(' ')[0];
-        const avatar = data.picture;
-        loginSuccess(name, avatar);
-        localStorage.setItem('rutaUser', JSON.stringify({
-          name: name,
-          fullName: data.name,
-          email: data.email,
-          picture: avatar
-        }));
-      })
-      .catch(err => {
-        console.error(err);
-        alert('Hubo un error al iniciar sesión con Google. Intenta de nuevo.');
-      });
-    }
-
-    // Función para decodificar JWT
     function parseJwt(token) {
       try {
         const base64Url = token.split('.')[1];
         const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-        }).join(''));
-        return JSON.parse(jsonPayload);
-      } catch (e) {
-        return {};
+        return JSON.parse(decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
+      } catch(e) { return {}; }
+    }
+
+    // ========== UPDATE UI ==========
+    function updateUI() {
+      if (!currentUser) return;
+      const data = getUserData();
+
+      // Dashboard
+      document.getElementById('dashName').textContent = currentUser.name;
+      document.getElementById('statPoints').textContent = data.points.toLocaleString();
+      document.getElementById('statKg').textContent = data.kg;
+      document.getElementById('statCo2').textContent = data.co2 + ' kg';
+      document.getElementById('statCount').textContent = data.history.length;
+
+      // Progress
+      const goal = 20;
+      const pct = Math.min(100, (data.kg / goal) * 100);
+      document.getElementById('progressBar').style.width = pct + '%';
+      document.getElementById('progressText').textContent = data.kg + ' / ' + goal + ' kg';
+
+      // Hero
+      document.getElementById('heroPoints').textContent = data.points.toLocaleString();
+      document.getElementById('heroKg').textContent = data.kg + ' kg';
+      document.getElementById('heroCo2').textContent = data.co2 + ' kg';
+
+      // Profile
+      document.getElementById('perfilAvatar').src = currentUser.avatar;
+      document.getElementById('perfilNombre').textContent = currentUser.name;
+      document.getElementById('perfilEmail').textContent = currentUser.email;
+      document.getElementById('perfilPuntos').textContent = data.points.toLocaleString();
+      document.getElementById('perfilKg').textContent = data.kg + ' kg';
+
+      // History
+      renderHistory(data.history);
+    }
+
+    function renderHistory(history) {
+      const dashEl = document.getElementById('dashHistory');
+      const fullEl = document.getElementById('fullHistory');
+
+      if (!history.length) {
+        dashEl.innerHTML = `<div class="empty-state"><div class="icon">📦</div><p>Aún no tienes recolecciones.<br>¡Agenda tu primera!</p><button class="btn-primary" style="margin-top:16px;" onclick="showPage('solicitar')">Solicitar ahora</button></div>`;
+        fullEl.innerHTML = `<div class="empty-state"><div class="icon">📋</div><p>Aún no tienes historial de recolecciones.</p></div>`;
+        return;
+      }
+
+      const items = history.slice().reverse().map(h => `
+        <div class="history-item">
+          <div class="hi-left">
+            <div class="hi-title">${h.materials.join(', ')}</div>
+            <div class="hi-date">${h.fecha} · ${h.hora}</div>
+          </div>
+          <div style="text-align:right;">
+            <div class="hi-kg">${h.kg} kg</div>
+            <span class="badge ${h.status === 'Completada' ? 'badge-success' : 'badge-pending'}">${h.status}</span>
+          </div>
+        </div>
+      `).join('');
+
+      dashEl.innerHTML = history.slice().reverse().slice(0, 4).map(h => `
+        <div class="history-item">
+          <div class="hi-left">
+            <div class="hi-title">${h.materials.join(', ')}</div>
+            <div class="hi-date">${h.fecha} · ${h.hora}</div>
+          </div>
+          <div style="text-align:right;">
+            <div class="hi-kg">${h.kg} kg</div>
+            <span class="badge ${h.status === 'Completada' ? 'badge-success' : 'badge-pending'}">${h.status}</span>
+          </div>
+        </div>
+      `).join('');
+
+      fullEl.innerHTML = items;
+    }
+
+    // ========== SOLICITAR RECOLECCIÓN ==========
+    function toggleMaterial(el) {
+      el.classList.toggle('selected');
+      const mat = el.dataset.mat;
+      if (el.classList.contains('selected')) {
+        if (!selectedMaterials.includes(mat)) selectedMaterials.push(mat);
+      } else {
+        selectedMaterials = selectedMaterials.filter(m => m !== mat);
       }
     }
 
-    // Restaurar sesión si ya había iniciado sesión antes
-    window.addEventListener('load', () => {
-      const saved = localStorage.getItem('rutaUser');
-      if (saved) {
-        try {
-          const user = JSON.parse(saved);
-          loginSuccess(user.name, user.picture);
-        } catch(e) {}
-      }
-    });
+    function submitRecoleccion() {
+      if (!currentUser) { openLoginModal(); return; }
+      if (selectedMaterials.length === 0) { alert('Selecciona al menos un material'); return; }
 
-    function simulateEmailLogin() {
-      const email = document.getElementById('emailInput').value.trim();
-      const password = document.getElementById('passInput').value;
+      const kg = parseFloat(document.getElementById('inputKg').value) || 1;
+      const fecha = document.getElementById('inputFecha').value || new Date().toISOString().slice(0,10);
+      const hora = document.getElementById('inputHora').value;
+      const direccion = document.getElementById('inputDireccion').value || 'Sin dirección';
 
-      // Validaciones como en una app real
-      if (!email) {
-        alert('Por favor escribe tu correo electrónico');
-        document.getElementById('emailInput').focus();
-        return;
-      }
-      if (!email.includes('@') || !email.includes('.')) {
-        alert('Por favor escribe un correo válido (ejemplo: juan@gmail.com)');
-        document.getElementById('emailInput').focus();
-        return;
-      }
-      if (!password) {
-        alert('Por favor escribe tu contraseña');
-        document.getElementById('passInput').focus();
-        return;
-      }
-      if (password.length < 4) {
-        alert('La contraseña debe tener al menos 4 caracteres');
-        document.getElementById('passInput').focus();
-        return;
-      }
+      const code = 'RC-' + Date.now().toString().slice(-6);
+      const data = getUserData();
 
-      // Simular carga (como apps reales)
-      const btn = document.getElementById('btnEmailLogin');
-      const originalText = btn.textContent;
-      btn.textContent = 'Iniciando sesión...';
-      btn.disabled = true;
-      btn.style.opacity = '0.7';
+      const item = {
+        id: code,
+        materials: [...selectedMaterials],
+        kg: kg,
+        fecha: fecha,
+        hora: hora,
+        direccion: direccion,
+        status: 'Pendiente',
+        puntos: Math.round(kg * 25)
+      };
 
-      setTimeout(() => {
-        // Extraer nombre del correo
-        let name = email.split('@')[0];
-        name = name.charAt(0).toUpperCase() + name.slice(1);
+      data.history.push(item);
+      data.kg = +(data.kg + kg).toFixed(1);
+      data.co2 = +(data.co2 + kg * 0.7).toFixed(1);
+      data.points += item.puntos;
+      saveUserData(data);
 
-        const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=00a86b&color=fff&size=128`;
-        
-        loginSuccess(name, avatar);
+      // Show confirmation
+      document.getElementById('confirmCode').textContent = code;
+      document.getElementById('confirmDetails').textContent = `${selectedMaterials.join(', ')} · ${kg} kg · ${fecha}`;
+      document.getElementById('qrCode').textContent = '📱';
 
-        // Restaurar botón
-        btn.textContent = originalText;
-        btn.disabled = false;
-        btn.style.opacity = '1';
-      }, 900);
+      // Reset form
+      selectedMaterials = [];
+      document.querySelectorAll('.material-chip').forEach(c => c.classList.remove('selected'));
+      document.getElementById('inputKg').value = 3;
+      document.getElementById('inputDireccion').value = '';
+      document.getElementById('inputNotas').value = '';
+
+      showPage('confirmacion');
+      showToast('¡Recolección agendada! +' + item.puntos + ' puntos');
     }
 
-    // Permitir Enter en los campos de login
-    document.getElementById('emailInput')?.addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') document.getElementById('passInput').focus();
-    });
-    document.getElementById('passInput')?.addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') simulateEmailLogin();
-    });
-
-    function showToast(msg) {
-      const t = document.createElement('div');
-      t.textContent = msg;
-      t.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#111;color:white;padding:14px 28px;border-radius:999px;font-size:0.9rem;z-index:999;box-shadow:0 8px 30px rgba(0,0,0,0.2);';
-      document.body.appendChild(t);
-      setTimeout(() => t.remove(), 3200);
-    }
-
-    // ===== CHATBOT =====
+    // ========== CHATBOT ==========
     function toggleChat() {
       const win = document.getElementById('chatWindow');
       const btn = document.getElementById('chatToggle');
@@ -799,7 +1019,7 @@
     function addMessage(text, type = 'bot', imageUrl = null) {
       const container = document.getElementById('chatMessages');
       const div = document.createElement('div');
-      div.className = `message ${type}`;
+      div.className = 'message ' + type;
       div.innerHTML = text;
       if (imageUrl) {
         const img = document.createElement('img');
@@ -816,7 +1036,7 @@
       if (!text) return;
       addMessage(text, 'user');
       input.value = '';
-      setTimeout(() => respondToText(text), 700);
+      setTimeout(() => respondToText(text), 600);
     }
 
     function handlePhoto(e) {
@@ -825,96 +1045,86 @@
       const reader = new FileReader();
       reader.onload = (ev) => {
         addMessage('📷 Foto enviada', 'user', ev.target.result);
-        setTimeout(() => analyzePhoto(file.name), 1200);
+        setTimeout(() => analyzePhoto(file.name), 1000);
       };
       reader.readAsDataURL(file);
       e.target.value = '';
     }
 
-    // Base de conocimiento simple según normativa colombiana (Resolución 2184 de 2019 y prácticas de Bogotá)
     function analyzePhoto(filename) {
       const name = filename.toLowerCase();
       let response = '';
-
-      // Simulación inteligente basada en nombre del archivo + respuestas educativas
-      if (name.includes('botella') || name.includes('plastic') || name.includes('pet') || name.includes('vaso')) {
-        response = `✅ <strong>Aprovechable</strong><br><br>
-        Este material (plástico PET o similar) sí es reciclable según la normativa colombiana de separación en la fuente.<br><br>
-        <strong>Recomendación:</strong><br>
-        • Enjuágalo si tiene residuos de comida/bebida<br>
-        • No lo aplastes demasiado (facilita la identificación)<br>
-        • Va en la bolsa o contenedor de <strong>aprovechables</strong> (generalmente blanca o verde según tu ciudad)<br><br>
-        ¡Puedes agendar su recolección y ganar puntos! 🌱`;
-      } else if (name.includes('carton') || name.includes('caja') || name.includes('papel') || name.includes('periodico') || name.includes('revista')) {
-        response = `✅ <strong>Aprovechable</strong><br><br>
-        El papel y el cartón son de los materiales más valiosos en el reciclaje colombiano.<br><br>
-        <strong>Consejo:</strong><br>
-        • Debe estar limpio y seco<br>
-        • Retira cintas adhesivas y plásticos si es posible<br>
-        • No sirve si está muy contaminado con grasa o comida<br><br>
-        ¡Excelente material para tu próxima recolección!`;
-      } else if (name.includes('vidrio') || name.includes('botella_vidrio') || name.includes('frasco')) {
-        response = `✅ <strong>Aprovechable</strong><br><br>
-        El vidrio es 100% reciclable y no pierde calidad.<br><br>
-        <strong>Importante:</strong><br>
-        • Enjuágalo<br>
-        • No lo mezcles con cerámica o espejos (esos no van)<br>
-        • En muchas ciudades se recolecta por separado<br><br>
-        Puedes incluirlo en tu agenda de Ruta Circular.`;
-      } else if (name.includes('lata') || name.includes('aluminio') || name.includes('metal') || name.includes('lata_cerveza')) {
-        response = `✅ <strong>Aprovechable</strong><br><br>
-        Metales y aluminio tienen alto valor de recuperación en Colombia.<br><br>
-        • Enjuaga las latas<br>
-        • Puedes aplastarlas para ahorrar espacio<br>
-        • Son muy cotizados por los recicladores<br><br>
-        ¡Genial para sumar puntos!`;
-      } else if (name.includes('organico') || name.includes('comida') || name.includes('cascara') || name.includes('banana') || name.includes('resto')) {
-        response = `❌ <strong>No aprovechable (en esta plataforma)</strong><br><br>
-        Los residuos orgánicos no se recolectan a través de Ruta Circular.<br><br>
-        Según la normativa, van en la bolsa <strong>verde o negra</strong> (según tu municipio) para compostaje o disposición final.<br><br>
-        Nosotros nos enfocamos en materiales secos aprovechables: papel, cartón, plástico, vidrio y metal.`;
-      } else if (name.includes('icopor') || name.includes('espuma') || name.includes('tecnopor')) {
-        response = `⚠️ <strong>Difícil de aprovechar</strong><br><br>
-        El icopor (poliestireno expandido) es complicado de reciclar en la mayoría de ciudades colombianas.<br><br>
-        En Bogotá y otras ciudades grandes casi no se recupera. Mejor evita usarlo o busca puntos especiales de recolección.`;
+      if (name.match(/botella|plastic|pet|vaso/)) {
+        response = `✅ <strong>Aprovechable</strong><br><br>Plástico PET reciclable según normativa colombiana.<br>• Enjuágalo<br>• Va en bolsa de aprovechables<br>¡Puedes agendar su recolección!`;
+      } else if (name.match(/carton|caja|papel|periodico|revista/)) {
+        response = `✅ <strong>Aprovechable</strong><br><br>Papel/cartón limpio es excelente para reciclar.<br>• Debe estar seco<br>• Retira cintas si es posible`;
+      } else if (name.match(/vidrio|frasco/)) {
+        response = `✅ <strong>Aprovechable</strong><br><br>El vidrio es 100% reciclable.<br>• Enjuágalo<br>• No mezclar con cerámica o espejos`;
+      } else if (name.match(/lata|aluminio|metal/)) {
+        response = `✅ <strong>Aprovechable</strong><br><br>Metales y aluminio tienen alto valor de recuperación.`;
+      } else if (name.match(/organico|comida|cascara|resto/)) {
+        response = `❌ <strong>No aprovechable aquí</strong><br><br>Los orgánicos no se recolectan en Ruta Circular. Van en bolsa de residuales/compostaje.`;
       } else {
-        // Respuesta genérica inteligente
-        response = `🔍 Estoy analizando la imagen...<br><br>
-        Según la <strong>Resolución 2184 de 2019</strong> y las guías de separación en la fuente en Colombia, los materiales <strong>aprovechables</strong> principales son:<br><br>
-        ✅ Papel y cartón limpios<br>
-        ✅ Plásticos (PET, PEAD, etc.)<br>
-        ✅ Vidrio<br>
-        ✅ Metales y aluminio<br><br>
-        ❌ No van: orgánicos, icopor, pañales, papel higiénico, cerámica, espejos.<br><br>
-        ¿Puedes describirme mejor qué material es? O sube otra foto más clara.`;
+        response = `Según la <strong>Resolución 2184 de 2019</strong>, los aprovechables son: papel, cartón, plástico, vidrio y metal.<br><br>¿Puedes describirme mejor el material?`;
       }
-
       addMessage(response, 'bot');
     }
 
     function respondToText(text) {
       const t = text.toLowerCase();
-      let response = '';
-
-      if (t.includes('hola') || t.includes('buenas') || t.includes('hey')) {
-        response = '¡Hola! 😊 ¿En qué te puedo ayudar? Puedes enviarme una foto de algo que quieras reciclar o preguntarme sobre la normativa.';
-      } else if (t.includes('plastico') || t.includes('botella') || t.includes('pet')) {
-        response = '✅ Las botellas plásticas PET sí son aprovechables. Enjuágalas y colócalas en tu bolsa de reciclables. ¡Ganarás puntos por cada kilo!';
-      } else if (t.includes('carton') || t.includes('caja') || t.includes('papel')) {
-        response = '✅ Papel y cartón limpios son excelentes para reciclar. Evita que estén grasosos o muy sucios.';
-      } else if (t.includes('vidrio')) {
-        response = '✅ El vidrio es 100% reciclable. Solo asegúrate de que no sea espejo ni cerámica.';
-      } else if (t.includes('organico') || t.includes('comida') || t.includes('cascara')) {
-        response = '❌ Los orgánicos no los recolectamos en Ruta Circular. Van en la bolsa de residuales o compostaje según tu ciudad.';
-      } else if (t.includes('norma') || t.includes('ley') || t.includes('resolucion') || t.includes('bogota')) {
-        response = 'En Colombia la separación en la fuente se rige principalmente por la <strong>Resolución 2184 de 2019</strong> del Ministerio de Ambiente. Los aprovechables (papel, cartón, plástico, vidrio, metal) deben separarse de los no aprovechables y orgánicos.';
-      } else if (t.includes('punto') || t.includes('ganar') || t.includes('recompensa')) {
-        response = '¡Cada kilo de material aprovechable que entregues te suma puntos! Luego podrás canjearlos por beneficios. Mientras más reciclas, más impacto generas 🌱';
-      } else {
-        response = 'Puedo ayudarte a identificar si un material es aprovechable. <strong>Sube una foto</strong> 📷 o dime qué material es (ej: “botella de plástico”, “caja de cartón”, “restos de comida”…).';
-      }
-      addMessage(response, 'bot');
+      let r = '';
+      if (t.match(/hola|buenas|hey/)) r = '¡Hola! 😊 ¿En qué te ayudo? Puedes enviarme una foto o preguntarme sobre materiales.';
+      else if (t.match(/plastico|botella|pet/)) r = '✅ Las botellas PET sí son aprovechables. Enjuágalas y agenda su recolección.';
+      else if (t.match(/carton|papel|caja/)) r = '✅ Papel y cartón limpios son excelentes. Evita que estén grasosos.';
+      else if (t.match(/vidrio/)) r = '✅ El vidrio es 100% reciclable. Solo que no sea espejo ni cerámica.';
+      else if (t.match(/organico|comida/)) r = '❌ Los orgánicos no los recolectamos. Van en bolsa de residuales.';
+      else if (t.match(/punto|ganar|recompensa/)) r = '¡Cada kilo te suma puntos! Aproxima 25 puntos por kilo de material aprovechable.';
+      else r = 'Puedo ayudarte a identificar materiales. <strong>Sube una foto</strong> 📷 o dime qué es (botella, cartón, restos de comida…).';
+      addMessage(r, 'bot');
     }
+
+    // ========== UTILS ==========
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    // Set min date to today
+    document.getElementById('inputFecha').min = new Date().toISOString().slice(0,10);
+    document.getElementById('inputFecha').value = new Date().toISOString().slice(0,10);
+
+    // Restore session
+    window.addEventListener('load', () => {
+      const saved = localStorage.getItem('rutaUser');
+      if (saved) {
+        try {
+          const u = JSON.parse(saved);
+          currentUser = u;
+          document.getElementById('userName').textContent = u.name;
+          document.getElementById('userAvatar').src = u.avatar;
+          document.getElementById('userChip').classList.add('visible');
+          document.getElementById('btnGoogleNav').style.display = 'none';
+          document.getElementById('btnLogin').style.display = 'none';
+          document.getElementById('btnLogout').style.display = 'inline-block';
+          ['navDash','navSolicitar','navHistorial','navPerfil'].forEach(id => {
+            document.getElementById(id).style.display = 'inline';
+          });
+          updateUI();
+        } catch(e) {}
+      }
+
+      // Navbar scroll
+      window.addEventListener('scroll', () => {
+        document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 30);
+      });
+    });
+
+    // Enter en login
+    document.getElementById('passInput')?.addEventListener('keypress', e => {
+      if (e.key === 'Enter') simulateEmailLogin();
+    });
   </script>
 </body>
 </html>
