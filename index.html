@@ -2,1128 +2,932 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ruta Circular — Recicla fácil, gana puntos y ve tu impacto</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Ruta Circular</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   <style>
     :root {
-      --green: #00a86b;
-      --green-dark: #008f5b;
-      --teal: #00c2a8;
-      --bg: #f5f7f6;
-      --white: #ffffff;
-      --text: #1a1a1a;
-      --text-light: #5f6368;
-      --border: #e8eaed;
-      --shadow: 0 4px 24px rgba(0,0,0,0.06);
-      --radius: 16px;
+      --g: #00a86b;
+      --g2: #008f5b;
+      --g3: #e6f7ef;
+      --g4: #f0fdf6;
+      --text: #1a2e22;
+      --muted: #6b7c72;
+      --border: #e5ede8;
+      --bg: #f7faf8;
+      --white: #fff;
+      --radius: 20px;
+      --shadow: 0 4px 20px rgba(0,80,50,0.06);
     }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
+    * { margin:0; padding:0; box-sizing:border-box; }
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: 'Inter', system-ui, sans-serif;
       background: var(--bg);
       color: var(--text);
-      line-height: 1.6;
-      overflow-x: hidden;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
     }
+    a { text-decoration: none; color: inherit; }
+    button { font-family: inherit; cursor: pointer; border: none; }
+    input, select, textarea { font-family: inherit; }
 
-    /* NAV */
-    nav {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-      background: rgba(255,255,255,0.9);
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid transparent;
-      transition: all 0.3s ease;
-    }
-    nav.scrolled { border-bottom-color: var(--border); box-shadow: 0 1px 12px rgba(0,0,0,0.04); }
-    .nav-inner {
-      max-width: 1200px; margin: 0 auto; padding: 14px 24px;
+    .topnav {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 20px;
       display: flex; align-items: center; justify-content: space-between;
     }
     .logo {
-      display: flex; align-items: center; gap: 10px;
-      font-weight: 700; font-size: 1.2rem; color: var(--text); text-decoration: none;
+      display: flex; align-items: center; gap: 8px;
+      font-weight: 700; font-size: 1.15rem; color: var(--g);
     }
-    .logo-icon {
-      width: 34px; height: 34px;
-      background: linear-gradient(135deg, var(--green), var(--teal));
-      border-radius: 10px; display: flex; align-items: center; justify-content: center;
-      color: white; font-size: 17px;
+    .logo-mark {
+      width: 32px; height: 32px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--g), #00c48a);
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-size: 16px;
     }
-    .nav-links { display: flex; gap: 28px; list-style: none; }
-    .nav-links a {
-      text-decoration: none; color: var(--text-light); font-weight: 500; font-size: 0.92rem;
-      transition: color 0.2s;
-    }
-    .nav-links a:hover, .nav-links a.active { color: var(--green); }
-    .nav-actions { display: flex; align-items: center; gap: 12px; }
-    .nav-cta {
-      background: var(--green); color: white; border: none;
-      padding: 10px 20px; border-radius: 999px; font-weight: 600; font-size: 0.9rem;
-      cursor: pointer; transition: all 0.25s ease;
-    }
-    .nav-cta:hover { background: var(--green-dark); transform: translateY(-1px); }
-    .btn-google {
+    .nav-right { display: flex; align-items: center; gap: 10px; }
+    .btn-g {
       display: flex; align-items: center; gap: 8px;
       background: white; border: 1.5px solid var(--border);
-      padding: 9px 16px; border-radius: 999px; font-weight: 500; font-size: 0.88rem;
-      cursor: pointer; transition: all 0.25s; color: var(--text);
+      padding: 8px 14px; border-radius: 999px; font-size: 0.85rem; font-weight: 500;
     }
-    .btn-google:hover { border-color: #dadce0; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-    .user-chip {
-      display: none; align-items: center; gap: 8px;
-      background: #f0fdf7; padding: 5px 12px 5px 5px; border-radius: 999px;
-      font-size: 0.85rem; font-weight: 500; cursor: pointer;
+    .btn-primary {
+      background: var(--g); color: white; padding: 10px 20px;
+      border-radius: 999px; font-weight: 600; font-size: 0.9rem;
+      transition: 0.2s;
     }
-    .user-chip img { width: 28px; height: 28px; border-radius: 50%; }
-    .user-chip.visible { display: flex; }
+    .btn-primary:hover { background: var(--g2); }
+    .btn-outline {
+      background: white; color: var(--g); border: 1.5px solid var(--g);
+      padding: 10px 20px; border-radius: 999px; font-weight: 600; font-size: 0.9rem;
+    }
+    .avatar-btn {
+      width: 36px; height: 36px; border-radius: 50%; overflow: hidden;
+      border: 2px solid var(--g3); cursor: pointer;
+    }
+    .avatar-btn img { width: 100%; height: 100%; object-fit: cover; }
 
-    /* PAGES */
-    .page { display: none; min-height: 100vh; padding-top: 80px; }
+    .page { display: none; min-height: calc(100vh - 60px); padding-bottom: 90px; }
     .page.active { display: block; }
 
-    /* HERO */
     .hero {
-      min-height: calc(100vh - 80px); display: flex; align-items: center;
-      padding: 40px 24px 80px;
-      background: linear-gradient(180deg, #f0fdf7 0%, var(--bg) 100%);
+      padding: 48px 20px 40px;
+      background: linear-gradient(180deg, #e8f8f0 0%, var(--bg) 100%);
+      text-align: center;
     }
-    .hero-content {
-      max-width: 1200px; margin: 0 auto;
-      display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 50px; align-items: center;
+    .hero h1 {
+      font-size: clamp(2rem, 6vw, 2.8rem); font-weight: 800;
+      line-height: 1.15; letter-spacing: -0.03em; margin-bottom: 14px;
     }
-    .hero-text h1 {
-      font-size: clamp(2.4rem, 4.5vw, 3.6rem); font-weight: 700;
-      line-height: 1.15; letter-spacing: -0.03em; margin-bottom: 20px;
-    }
-    .hero-text h1 span {
-      background: linear-gradient(90deg, var(--green), var(--teal));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    }
-    .hero-text p { font-size: 1.1rem; color: var(--text-light); max-width: 460px; margin-bottom: 32px; }
-    .hero-buttons { display: flex; gap: 14px; flex-wrap: wrap; }
-    .btn-primary {
-      background: var(--green); color: white; border: none;
-      padding: 14px 28px; border-radius: 999px; font-weight: 600; font-size: 0.95rem;
-      cursor: pointer; transition: all 0.25s; display: inline-flex; align-items: center; gap: 8px;
-    }
-    .btn-primary:hover { background: var(--green-dark); transform: translateY(-2px); box-shadow: 0 10px 28px rgba(0,168,107,0.3); }
-    .btn-secondary {
-      background: white; color: var(--text); border: 1.5px solid var(--border);
-      padding: 14px 28px; border-radius: 999px; font-weight: 600; font-size: 0.95rem;
-      cursor: pointer; transition: all 0.25s;
-    }
-    .btn-secondary:hover { border-color: var(--green); color: var(--green); }
-    .hero-card {
-      background: white; border-radius: 22px; padding: 28px;
+    .hero h1 span { color: var(--g); }
+    .hero p { color: var(--muted); font-size: 1.05rem; max-width: 420px; margin: 0 auto 28px; }
+    .hero-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 40px; }
+    .hero-illust {
+      max-width: 280px; margin: 0 auto;
+      background: white; border-radius: 24px; padding: 24px;
       box-shadow: var(--shadow); border: 1px solid var(--border);
     }
-    .hero-card .points { font-size: 2.8rem; font-weight: 700; color: var(--green); margin: 8px 0 4px; }
-    .hero-card .label { color: var(--text-light); font-size: 0.88rem; }
-    .impact-row { display: flex; gap: 16px; margin-top: 22px; }
-    .impact-item { flex: 1; background: #f0fdf7; border-radius: 12px; padding: 14px; text-align: center; }
-    .impact-item strong { display: block; font-size: 1.3rem; color: var(--green); }
+    .hero-illust .big-num { font-size: 2.6rem; font-weight: 800; color: var(--g); }
+    .features {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px; padding: 0 20px 48px; max-width: 900px; margin: 0 auto;
+    }
+    .feat {
+      background: white; border-radius: 18px; padding: 24px;
+      border: 1px solid var(--border); text-align: left;
+    }
+    .feat-icon {
+      width: 44px; height: 44px; border-radius: 12px;
+      background: var(--g3); display: flex; align-items: center; justify-content: center;
+      font-size: 20px; margin-bottom: 14px;
+    }
+    .feat h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 6px; }
+    .feat p { font-size: 0.88rem; color: var(--muted); }
 
-    /* SECTIONS */
-    .section { padding: 80px 24px; max-width: 1200px; margin: 0 auto; }
-    .section-header { text-align: center; margin-bottom: 48px; }
-    .section-header h2 { font-size: 2.1rem; font-weight: 700; margin-bottom: 12px; }
-    .section-header p { color: var(--text-light); font-size: 1.05rem; max-width: 520px; margin: 0 auto; }
-    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-    .feature-card {
-      background: white; border-radius: var(--radius); padding: 28px 24px;
-      border: 1px solid var(--border); transition: all 0.3s;
-    }
-    .feature-card:hover { transform: translateY(-6px); box-shadow: 0 16px 36px rgba(0,0,0,0.07); }
-    .feature-icon {
-      width: 50px; height: 50px; background: linear-gradient(135deg, #e6f9f0, #d0f5ea);
-      border-radius: 12px; display: flex; align-items: center; justify-content: center;
-      font-size: 22px; margin-bottom: 18px;
-    }
-    .feature-card h3 { font-size: 1.15rem; font-weight: 600; margin-bottom: 8px; }
-    .feature-card p { color: var(--text-light); font-size: 0.92rem; }
-    .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
-    .step { text-align: center; }
-    .step-number {
-      width: 44px; height: 44px; background: var(--green); color: white;
-      border-radius: 50%; display: flex; align-items: center; justify-content: center;
-      font-weight: 700; margin: 0 auto 14px;
-    }
-    .step h4 { font-size: 1rem; margin-bottom: 6px; }
-    .step p { color: var(--text-light); font-size: 0.88rem; }
+    .dash { max-width: 480px; margin: 0 auto; padding: 20px; }
+    .dash h1 { font-size: 1.5rem; font-weight: 800; margin-bottom: 4px; }
+    .dash .sub { color: var(--muted); font-size: 0.9rem; margin-bottom: 20px; }
 
-    /* DASHBOARD */
-    .dash-header {
-      max-width: 1100px; margin: 0 auto 32px; padding: 0 24px;
-      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;
+    .points-card {
+      background: linear-gradient(135deg, #e8f8f0, #d4f5e6);
+      border-radius: 20px; padding: 22px; margin-bottom: 16px;
+      border: 1px solid #c8ebd9;
     }
-    .dash-header h1 { font-size: 1.8rem; font-weight: 700; }
-    .dash-header p { color: var(--text-light); font-size: 0.95rem; }
-    .stats-grid {
-      max-width: 1100px; margin: 0 auto 32px; padding: 0 24px;
-      display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px;
-    }
-    .stat-card {
-      background: white; border-radius: 16px; padding: 22px;
-      border: 1px solid var(--border); transition: all 0.25s;
-    }
-    .stat-card:hover { box-shadow: var(--shadow); }
-    .stat-card .stat-label { font-size: 0.85rem; color: var(--text-light); margin-bottom: 6px; }
-    .stat-card .stat-value { font-size: 1.8rem; font-weight: 700; color: var(--green); }
-    .stat-card .stat-sub { font-size: 0.8rem; color: var(--text-light); margin-top: 4px; }
+    .points-card .label { font-size: 0.85rem; font-weight: 600; color: var(--g); display: flex; align-items: center; gap: 6px; }
+    .points-card .num { font-size: 2.4rem; font-weight: 800; color: var(--text); margin: 4px 0; }
+    .points-card .bar-bg { height: 8px; background: rgba(0,0,0,0.08); border-radius: 99px; margin: 10px 0 6px; overflow: hidden; }
+    .points-card .bar-fill { height: 100%; background: var(--g); border-radius: 99px; transition: width 0.5s; }
+    .points-card .hint { font-size: 0.8rem; color: var(--muted); }
 
-    .dash-grid {
-      max-width: 1100px; margin: 0 auto; padding: 0 24px 60px;
-      display: grid; grid-template-columns: 1.4fr 1fr; gap: 24px;
+    .next-card {
+      background: white; border-radius: 18px; padding: 18px;
+      border: 1px solid var(--border); margin-bottom: 16px;
+      display: flex; gap: 14px; align-items: flex-start;
     }
-    .card {
-      background: white; border-radius: 18px; border: 1px solid var(--border);
-      padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+    .next-icon {
+      width: 48px; height: 48px; border-radius: 14px; background: var(--g3);
+      display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0;
     }
-    .card h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
+    .next-card h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 6px; }
+    .next-row { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: var(--muted); margin-bottom: 3px; }
+    .status-ok { color: var(--g); font-weight: 600; font-size: 0.85rem; margin-top: 6px; }
+
+    .impact-card {
+      background: white; border-radius: 18px; padding: 20px;
+      border: 1px solid var(--border); margin-bottom: 16px;
+    }
+    .impact-card h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 6px; }
+    .impact-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .impact-stat { text-align: center; padding: 12px; background: var(--g4); border-radius: 14px; }
+    .impact-stat .v { font-size: 1.5rem; font-weight: 800; color: var(--g); }
+    .impact-stat .l { font-size: 0.75rem; color: var(--muted); }
+
+    .impact-hero {
+      background: linear-gradient(180deg, #e8f8f0, white);
+      border-radius: 20px; padding: 24px; margin-bottom: 16px;
+      border: 1px solid #c8ebd9; text-align: center;
+    }
+    .circle-wrap { position: relative; width: 140px; height: 140px; margin: 0 auto 16px; }
+    .circle-wrap svg { transform: rotate(-90deg); }
+    .circle-wrap .pct {
+      position: absolute; inset: 0; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+    }
+    .circle-wrap .pct strong { font-size: 1.8rem; font-weight: 800; color: var(--g); }
+    .circle-wrap .pct span { font-size: 0.75rem; color: var(--muted); }
+    .eq-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+    .eq-item {
+      background: white; border-radius: 14px; padding: 14px; text-align: center;
+      border: 1px solid var(--border);
+    }
+    .eq-item .v { font-size: 1.2rem; font-weight: 800; color: var(--g); }
+    .eq-item .l { font-size: 0.75rem; color: var(--muted); }
+
+    .history-list { background: white; border-radius: 18px; border: 1px solid var(--border); overflow: hidden; }
     .history-item {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 14px 0; border-bottom: 1px solid #f0f0f0;
+      display: flex; align-items: center; gap: 12px; padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
     }
     .history-item:last-child { border-bottom: none; }
-    .history-item .hi-left { display: flex; flex-direction: column; gap: 2px; }
-    .history-item .hi-title { font-weight: 500; font-size: 0.95rem; }
-    .history-item .hi-date { font-size: 0.8rem; color: var(--text-light); }
-    .history-item .hi-kg { font-weight: 600; color: var(--green); }
-    .badge {
-      display: inline-block; padding: 3px 10px; border-radius: 999px;
-      font-size: 0.75rem; font-weight: 600;
+    .hi-icon {
+      width: 40px; height: 40px; border-radius: 12px; background: var(--g3);
+      display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;
     }
-    .badge-success { background: #e6f9f0; color: var(--green); }
-    .badge-pending { background: #fff7e6; color: #d48806; }
+    .hi-info { flex: 1; min-width: 0; }
+    .hi-info .t { font-weight: 600; font-size: 0.9rem; }
+    .hi-info .d { font-size: 0.78rem; color: var(--muted); }
+    .hi-pts { font-weight: 700; color: var(--g); font-size: 0.9rem; }
 
-    /* FORM */
-    .form-group { margin-bottom: 18px; }
-    .form-group label { display: block; font-weight: 500; font-size: 0.9rem; margin-bottom: 6px; }
-    .form-group input, .form-group select, .form-group textarea {
+    .form-card {
+      background: white; border-radius: 20px; padding: 22px;
+      border: 1px solid var(--border); margin-bottom: 16px;
+    }
+    .form-card h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 4px; }
+    .form-card .hint { font-size: 0.8rem; color: var(--muted); margin-bottom: 14px; }
+    .addr-box {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--g4); border-radius: 12px; padding: 12px 14px;
+      border: 1.5px solid var(--border);
+    }
+    .addr-box input { border: none; background: transparent; flex: 1; font-size: 0.9rem; outline: none; }
+    .mats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .mat {
+      display: flex; align-items: center; gap: 10px;
+      border: 1.5px solid var(--border); border-radius: 14px; padding: 12px 14px;
+      cursor: pointer; transition: 0.2s; font-size: 0.9rem; font-weight: 500;
+    }
+    .mat.selected { border-color: var(--g); background: var(--g4); color: var(--g); }
+    .mat .check {
+      width: 22px; height: 22px; border-radius: 6px; border: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center; font-size: 12px;
+    }
+    .mat.selected .check { background: var(--g); border-color: var(--g); color: white; }
+    .field { margin-bottom: 14px; }
+    .field label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; }
+    .field input, .field select {
       width: 100%; padding: 12px 14px; border: 1.5px solid var(--border);
-      border-radius: 12px; font-size: 0.95rem; outline: none; transition: border 0.2s;
-      font-family: inherit;
+      border-radius: 12px; font-size: 0.9rem; outline: none; background: white;
     }
-    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--green); }
-    .materials-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-    .material-chip {
-      border: 1.5px solid var(--border); border-radius: 12px; padding: 12px;
-      text-align: center; cursor: pointer; transition: all 0.2s; font-size: 0.88rem;
-    }
-    .material-chip:hover { border-color: var(--green); }
-    .material-chip.selected { border-color: var(--green); background: #f0fdf7; color: var(--green); font-weight: 600; }
-    .material-chip span { display: block; font-size: 1.4rem; margin-bottom: 4px; }
-
-    /* QR */
-    .qr-box {
-      text-align: center; padding: 32px;
-    }
-    .qr-code {
-      width: 180px; height: 180px; background: #f0f0f0; border-radius: 16px;
-      margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;
-      font-size: 4rem; border: 2px dashed var(--border);
+    .field input:focus, .field select:focus { border-color: var(--g); }
+    .btn-full {
+      width: 100%; padding: 16px; border-radius: 14px; font-weight: 700; font-size: 1rem;
+      background: var(--g); color: white; display: flex; align-items: center; justify-content: center; gap: 8px;
     }
 
-    /* PROFILE */
-    .profile-header {
-      display: flex; align-items: center; gap: 20px; margin-bottom: 28px;
+    .confirm-wrap { max-width: 400px; margin: 0 auto; padding: 32px 20px; text-align: center; }
+    .confirm-wrap .ok-icon {
+      width: 64px; height: 64px; border-radius: 50%; background: var(--g3);
+      display: flex; align-items: center; justify-content: center; font-size: 28px;
+      margin: 0 auto 16px; color: var(--g);
     }
-    .profile-header img {
-      width: 72px; height: 72px; border-radius: 50%; border: 3px solid #e6f9f0;
+    .confirm-wrap h1 { font-size: 1.5rem; font-weight: 800; margin-bottom: 6px; }
+    .confirm-wrap .sub { color: var(--muted); margin-bottom: 24px; }
+    .qr-card {
+      background: white; border-radius: 20px; padding: 24px;
+      border: 1px solid var(--border); margin-bottom: 20px;
     }
-    .profile-header h2 { font-size: 1.4rem; }
-    .profile-header p { color: var(--text-light); font-size: 0.9rem; }
+    .qr-card .label { font-size: 0.85rem; font-weight: 600; color: var(--g); margin-bottom: 16px; }
+    #qrcode { display: flex; justify-content: center; margin-bottom: 16px; }
+    #qrcode img, #qrcode canvas { border-radius: 8px; }
+    .detail-row {
+      display: flex; align-items: flex-start; gap: 10px;
+      text-align: left; padding: 10px 0; border-top: 1px solid var(--border);
+      font-size: 0.88rem;
+    }
+    .detail-row .icon { font-size: 16px; width: 24px; }
+    .detail-row .k { color: var(--muted); font-size: 0.78rem; }
+    .detail-row .v { font-weight: 600; }
 
-    /* MODAL */
-    .modal-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 300;
+    .route-card {
+      background: white; border-radius: 16px; padding: 16px;
+      border: 1px solid var(--border); margin-bottom: 10px;
+      display: flex; gap: 12px; align-items: flex-start;
+    }
+    .route-dot {
+      width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 14px;
+    }
+    .route-dot.pending { background: #fff3cd; }
+    .route-dot.camino { background: #cce5ff; }
+    .route-dot.done { background: var(--g3); }
+    .route-info { flex: 1; }
+    .route-info .addr { font-weight: 600; font-size: 0.92rem; }
+    .route-info .meta { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
+    .badge {
+      display: inline-block; padding: 4px 10px; border-radius: 999px;
+      font-size: 0.75rem; font-weight: 600; white-space: nowrap;
+    }
+    .badge-pending { background: #fff3cd; color: #856404; }
+    .badge-camino { background: #cce5ff; color: #004085; }
+    .badge-done { background: var(--g3); color: var(--g); }
+    .map-placeholder {
+      background: #e8f0eb; border-radius: 16px; height: 160px;
       display: flex; align-items: center; justify-content: center;
-      opacity: 0; pointer-events: none; transition: opacity 0.3s;
+      color: var(--muted); font-size: 0.9rem; margin: 16px 0;
+      border: 1px dashed #b8d4c4; position: relative; overflow: hidden;
     }
-    .modal-overlay.open { opacity: 1; pointer-events: all; }
+
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 40;
+      background: white; border-top: 1px solid var(--border);
+      display: none; justify-content: space-around; padding: 8px 0 10px;
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.04);
+    }
+    .bottom-nav.visible { display: flex; }
+    .bn-item {
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+      font-size: 0.7rem; color: var(--muted); padding: 4px 12px; cursor: pointer;
+      font-weight: 500; background: none;
+    }
+    .bn-item.active { color: var(--g); font-weight: 700; }
+    .bn-item .ico { font-size: 1.3rem; }
+
+    .overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: 0.25s;
+    }
+    .overlay.open { opacity: 1; pointer-events: all; }
     .modal {
-      background: white; border-radius: 20px; padding: 36px; width: 400px; max-width: 92vw;
-      text-align: center; transform: scale(0.95); transition: transform 0.3s; position: relative;
+      background: white; border-radius: 24px; padding: 32px 24px;
+      width: 360px; max-width: 92vw; text-align: center; position: relative;
     }
-    .modal-overlay.open .modal { transform: scale(1); }
-    .modal h2 { font-size: 1.4rem; margin-bottom: 6px; }
-    .modal p { color: var(--text-light); margin-bottom: 24px; font-size: 0.92rem; }
-    .modal .btn-google { width: 100%; justify-content: center; padding: 13px; margin-bottom: 12px; }
-    .modal .divider { display: flex; align-items: center; gap: 12px; color: #999; font-size: 0.85rem; margin: 16px 0; }
-    .modal .divider::before, .modal .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .modal h2 { font-size: 1.3rem; font-weight: 800; margin-bottom: 6px; }
+    .modal p { color: var(--muted); font-size: 0.9rem; margin-bottom: 20px; }
     .modal input {
       width: 100%; padding: 12px 14px; border: 1.5px solid var(--border);
-      border-radius: 10px; margin-bottom: 10px; font-size: 0.95rem; outline: none;
+      border-radius: 12px; margin-bottom: 10px; font-size: 0.9rem; outline: none;
     }
-    .modal input:focus { border-color: var(--green); }
-    .close-modal {
-      position: absolute; top: 14px; right: 14px; background: none; border: none;
-      font-size: 22px; cursor: pointer; color: #999;
+    .close-x {
+      position: absolute; top: 14px; right: 16px; background: none;
+      font-size: 22px; color: #999; cursor: pointer;
     }
 
-    /* CHATBOT */
-    .chat-toggle {
-      position: fixed; bottom: 24px; right: 24px; z-index: 200;
-      width: 60px; height: 60px; border-radius: 50%;
-      background: linear-gradient(135deg, var(--green), var(--teal));
-      color: white; border: none; font-size: 26px; cursor: pointer;
-      box-shadow: 0 8px 28px rgba(0,168,107,0.4);
-      transition: all 0.3s; display: flex; align-items: center; justify-content: center;
-    }
-    .chat-toggle:hover { transform: scale(1.07); }
-    .chat-toggle.open { background: #333; }
-    .chat-window {
-      position: fixed; bottom: 96px; right: 24px; z-index: 200;
-      width: 370px; max-width: calc(100vw - 32px); height: 500px;
-      background: white; border-radius: 18px;
-      box-shadow: 0 18px 50px rgba(0,0,0,0.15);
-      display: flex; flex-direction: column; overflow: hidden;
-      opacity: 0; pointer-events: none; transform: translateY(16px) scale(0.96);
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .chat-window.open { opacity: 1; pointer-events: all; transform: translateY(0) scale(1); }
-    .chat-header {
-      background: linear-gradient(135deg, var(--green), var(--teal));
-      color: white; padding: 16px 18px; display: flex; align-items: center; gap: 12px;
-    }
-    .chat-header .avatar {
-      width: 38px; height: 38px; background: rgba(255,255,255,0.2);
-      border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px;
-    }
-    .chat-header h3 { font-size: 0.95rem; font-weight: 600; }
-    .chat-header p { font-size: 0.72rem; opacity: 0.85; }
-    .chat-messages {
-      flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px;
-      background: #f8f9fa;
-    }
-    .message {
-      max-width: 85%; padding: 11px 14px; border-radius: 14px; font-size: 0.88rem; line-height: 1.45;
-    }
-    .message.bot {
-      background: white; align-self: flex-start;
-      border-bottom-left-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    }
-    .message.user {
-      background: var(--green); color: white; align-self: flex-end;
-      border-bottom-right-radius: 4px;
-    }
-    .message img { max-width: 100%; border-radius: 8px; margin-top: 6px; display: block; }
-    .chat-input-area {
-      padding: 12px 14px; border-top: 1px solid var(--border);
-      display: flex; gap: 8px; align-items: center; background: white;
-    }
-    .chat-input-area input[type="text"] {
-      flex: 1; border: 1.5px solid var(--border); border-radius: 999px;
-      padding: 10px 16px; font-size: 0.88rem; outline: none;
-    }
-    .chat-input-area input[type="text"]:focus { border-color: var(--green); }
-    .chat-input-area button {
-      width: 40px; height: 40px; border-radius: 50%; border: none;
-      background: var(--green); color: white; cursor: pointer; font-size: 16px;
+    .chat-btn {
+      position: fixed; bottom: 80px; right: 16px; z-index: 45;
+      width: 54px; height: 54px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--g), #00c48a);
+      color: white; font-size: 22px; box-shadow: 0 6px 24px rgba(0,168,107,0.35);
       display: flex; align-items: center; justify-content: center;
     }
-    .photo-btn { background: #f0fdf7 !important; color: var(--green) !important; }
-
-    /* FOOTER */
-    footer {
-      background: #111; color: #aaa; padding: 48px 24px 32px; text-align: center; font-size: 0.88rem;
+    .chat-win {
+      position: fixed; bottom: 145px; right: 16px; z-index: 45;
+      width: 340px; max-width: calc(100vw - 32px); height: 440px;
+      background: white; border-radius: 18px; box-shadow: 0 16px 48px rgba(0,0,0,0.15);
+      display: flex; flex-direction: column; overflow: hidden;
+      opacity: 0; pointer-events: none; transform: translateY(12px) scale(0.96);
+      transition: 0.25s;
     }
-    footer .logo { color: white; justify-content: center; margin-bottom: 14px; }
-
-    /* EMPTY STATE */
-    .empty-state { text-align: center; padding: 40px 20px; color: var(--text-light); }
-    .empty-state .icon { font-size: 2.5rem; margin-bottom: 12px; }
-
-    /* RESPONSIVE */
-    @media (max-width: 900px) {
-      .hero-content { grid-template-columns: 1fr; text-align: center; }
-      .hero-text p { margin-left: auto; margin-right: auto; }
-      .hero-buttons { justify-content: center; }
-      .features-grid { grid-template-columns: 1fr; }
-      .steps { grid-template-columns: 1fr 1fr; }
-      .nav-links { display: none; }
-      .stats-grid { grid-template-columns: 1fr 1fr; }
-      .dash-grid { grid-template-columns: 1fr; }
-      .materials-grid { grid-template-columns: 1fr 1fr; }
+    .chat-win.open { opacity: 1; pointer-events: all; transform: none; }
+    .chat-hd {
+      background: linear-gradient(135deg, var(--g), #00c48a);
+      color: white; padding: 14px 16px; display: flex; gap: 10px; align-items: center;
     }
-    @media (max-width: 600px) {
-      .steps { grid-template-columns: 1fr; }
-      .stats-grid { grid-template-columns: 1fr; }
-    }
+    .chat-msgs { flex: 1; overflow-y: auto; padding: 14px; background: #f7faf8; display: flex; flex-direction: column; gap: 10px; }
+    .msg { max-width: 85%; padding: 10px 13px; border-radius: 14px; font-size: 0.85rem; line-height: 1.4; }
+    .msg.bot { background: white; align-self: flex-start; border-bottom-left-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .msg.user { background: var(--g); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+    .chat-in { padding: 10px; border-top: 1px solid var(--border); display: flex; gap: 8px; }
+    .chat-in input { flex: 1; border: 1.5px solid var(--border); border-radius: 999px; padding: 9px 14px; font-size: 0.85rem; outline: none; }
+    .chat-in button { width: 38px; height: 38px; border-radius: 50%; background: var(--g); color: white; font-size: 15px; }
 
     .toast {
       position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
-      background: #111; color: white; padding: 14px 26px; border-radius: 999px;
-      font-size: 0.9rem; z-index: 999; box-shadow: 0 8px 30px rgba(0,0,0,0.2);
-      opacity: 0; transition: opacity 0.3s;
+      background: #1a2e22; color: white; padding: 12px 22px; border-radius: 999px;
+      font-size: 0.88rem; z-index: 200; opacity: 0; transition: 0.3s; pointer-events: none;
     }
     .toast.show { opacity: 1; }
+
+    @media (min-width: 700px) {
+      .dash { max-width: 520px; }
+      .bottom-nav { max-width: 480px; left: 50%; transform: translateX(-50%); border-radius: 16px 16px 0 0; }
+    }
   </style>
 </head>
 <body>
 
-  <!-- NAV -->
-  <nav id="navbar">
-    <div class="nav-inner">
-      <a href="#" class="logo" onclick="showPage('home')">
-        <div class="logo-icon">♻</div>
-        Ruta Circular
-      </a>
-      <ul class="nav-links" id="navLinks">
-        <li><a href="#" onclick="showPage('home')">Inicio</a></li>
-        <li><a href="#" onclick="showPage('dashboard')" id="navDash" style="display:none">Mi panel</a></li>
-        <li><a href="#" onclick="showPage('solicitar')" id="navSolicitar" style="display:none">Solicitar</a></li>
-        <li><a href="#" onclick="showPage('historial')" id="navHistorial" style="display:none">Historial</a></li>
-        <li><a href="#" onclick="showPage('perfil')" id="navPerfil" style="display:none">Perfil</a></li>
-      </ul>
-      <div class="nav-actions">
-        <div class="user-chip" id="userChip" onclick="showPage('perfil')">
-          <img id="userAvatar" src="" alt="Usuario">
-          <span id="userName">Usuario</span>
-        </div>
-        <button class="btn-google" id="btnGoogleNav" onclick="startGoogleLogin()">
-          <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-          Continuar con Google
-        </button>
-        <button class="nav-cta" id="btnLogin" onclick="openLoginModal()">Iniciar sesión</button>
-        <button class="nav-cta" id="btnLogout" style="display:none; background:#eee; color:#333;" onclick="logout()">Salir</button>
+  <nav class="topnav">
+    <a href="#" class="logo" onclick="go('home')">
+      <div class="logo-mark">♻</div>
+      Ruta Circular
+    </a>
+    <div class="nav-right">
+      <button class="btn-g" id="btnGoogle" onclick="startGoogleLogin()">
+        <svg width="16" height="16" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+        Google
+      </button>
+      <button class="btn-primary" id="btnLogin" onclick="openLogin()">Iniciar sesión</button>
+      <div class="avatar-btn" id="avatarBtn" style="display:none" onclick="go('perfil')">
+        <img id="navAvatar" src="" alt="">
       </div>
     </div>
   </nav>
 
-  <!-- ==================== HOME ==================== -->
   <div id="page-home" class="page active">
     <section class="hero">
-      <div class="hero-content">
-        <div class="hero-text">
-          <h1>Recicla fácil,<br><span>gana puntos</span><br>y ve tu impacto</h1>
-          <p>Conectamos hogares, restaurantes y comercios con recicladores de forma simple, confiable y motivadora.</p>
-          <div class="hero-buttons">
-            <button class="btn-primary" onclick="requireLogin('solicitar')">Solicitar recolección →</button>
-            <button class="btn-secondary" onclick="requireLogin('dashboard')">Ver mi panel</button>
-          </div>
-        </div>
-        <div class="hero-visual">
-          <div class="hero-card">
-            <div class="label">Tus puntos acumulados</div>
-            <div class="points" id="heroPoints">0</div>
-            <div class="label">¡Empieza a reciclar hoy!</div>
-            <div class="impact-row">
-              <div class="impact-item">
-                <strong id="heroKg">0 kg</strong>
-                <span style="font-size:0.8rem;color:#5f6368">Reciclados</span>
-              </div>
-              <div class="impact-item">
-                <strong id="heroCo2">0 kg</strong>
-                <span style="font-size:0.8rem;color:#5f6368">CO₂ evitado</span>
-              </div>
-            </div>
-          </div>
+      <h1>Recicla fácil,<br><span>gana puntos</span><br>y ve tu impacto</h1>
+      <p>Conectamos hogares, restaurantes y comercios con recicladores de forma simple y confiable</p>
+      <div class="hero-btns">
+        <button class="btn-primary" onclick="needLogin('solicitar')">📅 Solicitar recolección</button>
+        <button class="btn-outline" onclick="needLogin('rutas')">👤 Soy reciclador</button>
+      </div>
+      <div class="hero-illust">
+        <div style="font-size:0.85rem;color:var(--muted)">Tus puntos</div>
+        <div class="big-num" id="homePoints">0</div>
+        <div style="display:flex;gap:20px;justify-content:center;margin-top:12px">
+          <div><strong id="homeKg" style="color:var(--g)">0 kg</strong><br><span style="font-size:0.75rem;color:var(--muted)">Reciclados</span></div>
+          <div><strong id="homeCo2" style="color:var(--g)">0 kg</strong><br><span style="font-size:0.75rem;color:var(--muted)">CO₂ evitado</span></div>
         </div>
       </div>
     </section>
-
-    <section class="section">
-      <div class="section-header">
-        <h2>Todo lo que necesitas para reciclar mejor</h2>
-        <p>Diseñado para que reciclar sea tan simple como pedir un domicilio.</p>
+    <div class="features">
+      <div class="feat">
+        <div class="feat-icon">📅</div>
+        <h3>Agenda de recolección</h3>
+        <p>Programa recolecciones cuando te funcione mejor, desde la web.</p>
       </div>
-      <div class="features-grid">
-        <div class="feature-card">
-          <div class="feature-icon">📅</div>
-          <h3>Agenda de recolección</h3>
-          <p>Programa el retiro de tus materiales el día y hora que más te convenga.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">⭐</div>
-          <h3>Puntos por kilos</h3>
-          <p>Gana puntos por cada kilo reciclado y canjéalos por beneficios reales.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">📊</div>
-          <h3>Tablero de impacto</h3>
-          <p>Visualiza cuántos kilos has recuperado y cuánto CO₂ has evitado.</p>
-        </div>
+      <div class="feat">
+        <div class="feat-icon">⭐</div>
+        <h3>Puntos por kilos</h3>
+        <p>Gana puntos por cada kilo reciclado y canjéalos por beneficios.</p>
       </div>
-    </section>
-
-    <section class="section" style="background:#fff; max-width:100%;">
-      <div style="max-width:1200px; margin:0 auto;">
-        <div class="section-header">
-          <h2>Así de simple funciona</h2>
-          <p>Cuatro pasos para cerrar el ciclo de tus materiales.</p>
-        </div>
-        <div class="steps">
-          <div class="step"><div class="step-number">1</div><h4>Regístrate</h4><p>Crea tu cuenta en menos de un minuto</p></div>
-          <div class="step"><div class="step-number">2</div><h4>Agenda</h4><p>Elige materiales, fecha y hora</p></div>
-          <div class="step"><div class="step-number">3</div><h4>Entrega</h4><p>Muestra el QR al reciclador</p></div>
-          <div class="step"><div class="step-number">4</div><h4>Impacta</h4><p>Acumula puntos y ve tu huella positiva</p></div>
-        </div>
+      <div class="feat">
+        <div class="feat-icon">📊</div>
+        <h3>Tablero de impacto</h3>
+        <p>Visualiza tu contribución al planeta: CO₂, árboles y más.</p>
       </div>
-    </section>
+    </div>
   </div>
 
-  <!-- ==================== DASHBOARD ==================== -->
   <div id="page-dashboard" class="page">
-    <div class="dash-header">
-      <div>
-        <h1>Hola, <span id="dashName">Usuario</span> 👋</h1>
-        <p>Este es tu resumen de impacto circular</p>
+    <div class="dash">
+      <h1>Hola, <span id="dashName">Usuario</span> 👋</h1>
+      <p class="sub">Tu resumen de impacto circular</p>
+      <div class="points-card">
+        <div class="label">🍃 Mis puntos</div>
+        <div class="num" id="dashPoints">0</div>
+        <div class="bar-bg"><div class="bar-fill" id="pointsBar" style="width:0%"></div></div>
+        <div class="hint" id="pointsHint">Sigue reciclando para alcanzar tu próximo premio</div>
       </div>
-      <button class="btn-primary" onclick="showPage('solicitar')">+ Nueva recolección</button>
-    </div>
-
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-label">Puntos acumulados</div>
-        <div class="stat-value" id="statPoints">0</div>
-        <div class="stat-sub">Canjeables por beneficios</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Kilos reciclados</div>
-        <div class="stat-value" id="statKg">0</div>
-        <div class="stat-sub">Material aprovechable</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">CO₂ evitado</div>
-        <div class="stat-value" id="statCo2">0 kg</div>
-        <div class="stat-sub">Huella positiva</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Recolecciones</div>
-        <div class="stat-value" id="statCount">0</div>
-        <div class="stat-sub">Solicitudes realizadas</div>
-      </div>
-    </div>
-
-    <div class="dash-grid">
-      <div class="card">
-        <h3>📋 Últimas recolecciones</h3>
-        <div id="dashHistory">
-          <div class="empty-state">
-            <div class="icon">📦</div>
-            <p>Aún no tienes recolecciones.<br>¡Agenda tu primera!</p>
-            <button class="btn-primary" style="margin-top:16px;" onclick="showPage('solicitar')">Solicitar ahora</button>
+      <div class="next-card" id="nextCard">
+        <div class="next-icon">🗑️</div>
+        <div>
+          <h3>Próxima recolección</h3>
+          <div id="nextContent">
+            <div style="color:var(--muted);font-size:0.9rem">No tienes recolecciones pendientes</div>
+            <button class="btn-primary" style="margin-top:10px;padding:8px 16px;font-size:0.85rem" onclick="go('solicitar')">Agendar una</button>
           </div>
         </div>
       </div>
-      <div class="card">
-        <h3>🌱 Tu impacto</h3>
-        <div style="margin-bottom:20px;">
-          <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
-            <span style="font-size:0.9rem;">Progreso del mes</span>
-            <span style="font-size:0.9rem; font-weight:600; color:var(--green);" id="progressText">0 / 20 kg</span>
+      <div class="impact-card">
+        <h3>🌱 Impacto ambiental</h3>
+        <div class="impact-stats">
+          <div class="impact-stat">
+            <div class="v" id="dashKg">0</div>
+            <div class="l">kg reciclados</div>
           </div>
-          <div style="height:10px; background:#eee; border-radius:99px; overflow:hidden;">
-            <div id="progressBar" style="height:100%; width:0%; background:linear-gradient(90deg,var(--green),var(--teal)); border-radius:99px; transition:width 0.5s;"></div>
+          <div class="impact-stat">
+            <div class="v" id="dashCo2">0</div>
+            <div class="l">kg CO₂ evitado</div>
           </div>
         </div>
-        <p style="font-size:0.9rem; color:var(--text-light); line-height:1.5;">
-          Cada kilo de material aprovechable que entregas ayuda a reducir la basura en rellenos sanitarios y genera ingresos para recicladores de oficio.
-        </p>
-        <button class="btn-secondary" style="width:100%; margin-top:18px;" onclick="showPage('historial')">Ver historial completo</button>
+        <button class="btn-outline" style="width:100%;margin-top:14px;padding:10px" onclick="go('impacto')">Ver impacto completo →</button>
       </div>
     </div>
   </div>
 
-  <!-- ==================== SOLICITAR ==================== -->
-  <div id="page-solicitar" class="page">
-    <div class="dash-header">
-      <div>
-        <h1>Solicitar recolección</h1>
-        <p>Elige los materiales y agenda el retiro</p>
-      </div>
-    </div>
-
-    <div style="max-width:600px; margin:0 auto; padding:0 24px 60px;">
-      <div class="card">
-        <div class="form-group">
-          <label>¿Qué materiales vas a entregar?</label>
-          <div class="materials-grid" id="materialsGrid">
-            <div class="material-chip" data-mat="Plástico" onclick="toggleMaterial(this)"><span>🧴</span>Plástico</div>
-            <div class="material-chip" data-mat="Cartón" onclick="toggleMaterial(this)"><span>📦</span>Cartón</div>
-            <div class="material-chip" data-mat="Papel" onclick="toggleMaterial(this)"><span>📄</span>Papel</div>
-            <div class="material-chip" data-mat="Vidrio" onclick="toggleMaterial(this)"><span>🫙</span>Vidrio</div>
-            <div class="material-chip" data-mat="Metal" onclick="toggleMaterial(this)"><span>🥫</span>Metal</div>
-            <div class="material-chip" data-mat="Otros" onclick="toggleMaterial(this)"><span>♻️</span>Otros</div>
+  <div id="page-impacto" class="page">
+    <div class="dash">
+      <h1>Tu impacto ambiental</h1>
+      <p class="sub">Tu acción de hoy, un planeta mejor mañana 🍃</p>
+      <div class="impact-hero">
+        <div class="circle-wrap">
+          <svg width="140" height="140" viewBox="0 0 140 140">
+            <circle cx="70" cy="70" r="60" fill="none" stroke="#e0efe6" stroke-width="12"/>
+            <circle id="progressCircle" cx="70" cy="70" r="60" fill="none" stroke="#00a86b" stroke-width="12"
+              stroke-linecap="round" stroke-dasharray="377" stroke-dashoffset="377"/>
+          </svg>
+          <div class="pct">
+            <strong id="impactPct">0%</strong>
+            <span>de tu meta</span>
           </div>
         </div>
-
-        <div class="form-group">
-          <label>Kilos aproximados</label>
-          <input type="number" id="inputKg" placeholder="Ej: 5" min="1" max="100" value="3">
+        <div style="font-size:1.4rem;font-weight:800" id="impactKgBig">0 kg</div>
+        <div style="color:var(--muted);font-size:0.9rem">reciclados este mes</div>
+        <div class="eq-grid">
+          <div class="eq-item">
+            <div class="v" id="eqTrees">0</div>
+            <div class="l">🌳 árboles equivalentes</div>
+          </div>
+          <div class="eq-item">
+            <div class="v" id="eqCo2">0 kg</div>
+            <div class="l">CO₂ evitado</div>
+          </div>
         </div>
+      </div>
+      <h3 style="font-size:0.95rem;font-weight:700;margin-bottom:10px">Recolecciones recientes</h3>
+      <div class="history-list" id="impactHistory"></div>
+    </div>
+  </div>
 
-        <div class="form-group">
-          <label>Fecha de recolección</label>
+  <div id="page-solicitar" class="page">
+    <div class="dash">
+      <h1>Solicitar recolección</h1>
+      <p class="sub">Programa el retiro de tus materiales reciclables</p>
+      <div class="form-card">
+        <h3>📍 Dirección</h3>
+        <p class="hint">Confirma tu dirección de recolección</p>
+        <div class="addr-box">
+          <span>📍</span>
+          <input type="text" id="inputDir" placeholder="Calle, número, barrio, ciudad">
+        </div>
+      </div>
+      <div class="form-card">
+        <h3>♻️ Tipo de material</h3>
+        <p class="hint">Selecciona los materiales que deseas reciclar</p>
+        <div class="mats" id="mats">
+          <div class="mat" data-m="Cartón" onclick="togMat(this)"><div class="check">✓</div> 📦 Cartón</div>
+          <div class="mat" data-m="Plástico" onclick="togMat(this)"><div class="check">✓</div> 🧴 Plástico</div>
+          <div class="mat" data-m="Vidrio" onclick="togMat(this)"><div class="check">✓</div> 🫙 Vidrio</div>
+          <div class="mat" data-m="Metal" onclick="togMat(this)"><div class="check">✓</div> 🥫 Metal</div>
+          <div class="mat" data-m="Papel" onclick="togMat(this)"><div class="check">✓</div> 📄 Papel</div>
+          <div class="mat" data-m="Otros" onclick="togMat(this)"><div class="check">✓</div> ♻️ Otros</div>
+        </div>
+      </div>
+      <div class="form-card">
+        <div class="field">
+          <label>Cantidad aproximada (kg)</label>
+          <input type="number" id="inputKg" value="5" min="1" max="200">
+        </div>
+        <div class="field">
+          <label>Fecha preferida</label>
           <input type="date" id="inputFecha">
         </div>
-
-        <div class="form-group">
+        <div class="field">
           <label>Franja horaria</label>
           <select id="inputHora">
-            <option value="Mañana (8am - 12pm)">Mañana (8am - 12pm)</option>
-            <option value="Tarde (12pm - 5pm)">Tarde (12pm - 5pm)</option>
-            <option value="Noche (5pm - 8pm)">Noche (5pm - 8pm)</option>
+            <option>08:00 - 10:00</option>
+            <option>10:00 - 12:00</option>
+            <option>12:00 - 14:00</option>
+            <option>14:00 - 16:00</option>
+            <option>16:00 - 18:00</option>
           </select>
         </div>
-
-        <div class="form-group">
-          <label>Dirección</label>
-          <input type="text" id="inputDireccion" placeholder="Calle, número, barrio, ciudad">
-        </div>
-
-        <div class="form-group">
-          <label>Notas adicionales (opcional)</label>
-          <textarea id="inputNotas" rows="2" placeholder="Ej: Timbre dañado, dejar con el portero..."></textarea>
-        </div>
-
-        <button class="btn-primary" style="width:100%; padding:16px; font-size:1rem;" onclick="submitRecoleccion()">
-          Confirmar solicitud →
-        </button>
       </div>
+      <button class="btn-full" onclick="submitReq()">✓ Confirmar solicitud →</button>
     </div>
   </div>
 
-  <!-- ==================== CONFIRMACIÓN + QR ==================== -->
-  <div id="page-confirmacion" class="page">
-    <div style="max-width:480px; margin:0 auto; padding:40px 24px 60px;">
-      <div class="card qr-box">
-        <div style="font-size:3rem; margin-bottom:12px;">✅</div>
-        <h2 style="margin-bottom:8px;">¡Solicitud creada!</h2>
-        <p style="color:var(--text-light); margin-bottom:24px;">Muestra este código QR al reciclador cuando llegue</p>
-        
-        <div class="qr-code" id="qrCode">📱</div>
-        
-        <p style="font-weight:600; font-size:1.1rem; margin-bottom:4px;" id="confirmCode">RC-000000</p>
-        <p style="font-size:0.88rem; color:var(--text-light); margin-bottom:24px;" id="confirmDetails">—</p>
-        
-        <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
-          <button class="btn-primary" onclick="showPage('dashboard')">Ir a mi panel</button>
-          <button class="btn-secondary" onclick="showPage('historial')">Ver historial</button>
+  <div id="page-confirm" class="page">
+    <div class="confirm-wrap">
+      <div class="ok-icon">✓</div>
+      <h1>¡Recolección agendada!</h1>
+      <p class="sub">Gracias por reciclar y ser parte del cambio 🍃</p>
+      <div class="qr-card">
+        <div class="label">Muestra este QR al reciclador</div>
+        <div id="qrcode"></div>
+        <div class="detail-row">
+          <div class="icon">📅</div>
+          <div><div class="k">Fecha</div><div class="v" id="cFecha">—</div></div>
+        </div>
+        <div class="detail-row">
+          <div class="icon">🕐</div>
+          <div><div class="k">Hora</div><div class="v" id="cHora">—</div></div>
+        </div>
+        <div class="detail-row">
+          <div class="icon">📍</div>
+          <div><div class="k">Dirección</div><div class="v" id="cDir">—</div></div>
+        </div>
+        <div class="detail-row">
+          <div class="icon">♻️</div>
+          <div><div class="k">Materiales</div><div class="v" id="cMats">—</div></div>
         </div>
       </div>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+        <button class="btn-primary" onclick="go('dashboard')">Ver en mi agenda</button>
+        <button class="btn-outline" onclick="go('impacto')">Ver impacto</button>
+      </div>
+      <p style="margin-top:20px;font-size:0.8rem;color:var(--muted)">🔒 Tu información está segura y tu recolección está confirmada</p>
     </div>
   </div>
 
-  <!-- ==================== HISTORIAL ==================== -->
   <div id="page-historial" class="page">
-    <div class="dash-header">
-      <div>
-        <h1>Historial de recolecciones</h1>
-        <p>Todas tus entregas y su estado</p>
-      </div>
-      <button class="btn-primary" onclick="showPage('solicitar')">+ Nueva</button>
-    </div>
-
-    <div style="max-width:700px; margin:0 auto; padding:0 24px 60px;">
-      <div class="card">
-        <div id="fullHistory">
-          <div class="empty-state">
-            <div class="icon">📋</div>
-            <p>Aún no tienes historial de recolecciones.</p>
-          </div>
-        </div>
-      </div>
+    <div class="dash">
+      <h1>Historial</h1>
+      <p class="sub">Todas tus recolecciones</p>
+      <div class="history-list" id="fullHistory"></div>
     </div>
   </div>
 
-  <!-- ==================== PERFIL ==================== -->
   <div id="page-perfil" class="page">
-    <div class="dash-header">
-      <div>
-        <h1>Mi perfil</h1>
-        <p>Tu información y estadísticas</p>
+    <div class="dash">
+      <h1>Mi perfil</h1>
+      <div style="text-align:center;margin:24px 0">
+        <img id="perfilImg" src="" style="width:80px;height:80px;border-radius:50%;border:3px solid var(--g3)">
+        <h2 id="perfilName" style="margin-top:12px;font-size:1.3rem"></h2>
+        <p id="perfilEmail" style="color:var(--muted);font-size:0.9rem"></p>
       </div>
-    </div>
-
-    <div style="max-width:600px; margin:0 auto; padding:0 24px 60px;">
-      <div class="card">
-        <div class="profile-header">
-          <img id="perfilAvatar" src="" alt="Avatar">
-          <div>
-            <h2 id="perfilNombre">Usuario</h2>
-            <p id="perfilEmail">correo@email.com</p>
-          </div>
-        </div>
-
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:24px;">
-          <div style="background:#f0fdf7; border-radius:12px; padding:16px; text-align:center;">
-            <div style="font-size:1.5rem; font-weight:700; color:var(--green);" id="perfilPuntos">0</div>
-            <div style="font-size:0.8rem; color:var(--text-light);">Puntos</div>
-          </div>
-          <div style="background:#f0fdf7; border-radius:12px; padding:16px; text-align:center;">
-            <div style="font-size:1.5rem; font-weight:700; color:var(--green);" id="perfilKg">0 kg</div>
-            <div style="font-size:0.8rem; color:var(--text-light);">Reciclados</div>
-          </div>
-        </div>
-
-        <button class="btn-secondary" style="width:100%; margin-bottom:10px;" onclick="showPage('dashboard')">Ver mi panel</button>
-        <button class="btn-secondary" style="width:100%; color:#c0392b; border-color:#f5c6cb;" onclick="logout()">Cerrar sesión</button>
+      <div class="impact-stats" style="margin-bottom:20px">
+        <div class="impact-stat"><div class="v" id="pPts">0</div><div class="l">Puntos</div></div>
+        <div class="impact-stat"><div class="v" id="pKg">0 kg</div><div class="l">Reciclados</div></div>
       </div>
+      <button class="btn-outline" style="width:100%;margin-bottom:10px" onclick="go('dashboard')">Ir a mi panel</button>
+      <button class="btn-outline" style="width:100%;color:#c0392b;border-color:#f5c6cb" onclick="logout()">Cerrar sesión</button>
     </div>
   </div>
 
-  <!-- FOOTER -->
-  <footer>
-    <div class="logo"><div class="logo-icon">♻</div> Ruta Circular</div>
-    <p>Economía circular • Optimización logística • Impacto real</p>
-    <p style="margin-top:10px; opacity:0.6;">Proyecto académico Digital Business — 2026</p>
-  </footer>
-
-  <!-- LOGIN MODAL -->
-  <div class="modal-overlay" id="loginModal">
-    <div class="modal">
-      <button class="close-modal" onclick="closeLoginModal()">×</button>
-      <div class="logo" style="justify-content:center; margin-bottom:18px;">
-        <div class="logo-icon">♻</div> Ruta Circular
+  <div id="page-rutas" class="page">
+    <div class="dash">
+      <h1>Mis rutas de hoy</h1>
+      <p class="sub">3 recolecciones programadas · 120 kg estimados</p>
+      <div id="rutasList">
+        <div class="route-card">
+          <div class="route-dot pending">📍</div>
+          <div class="route-info">
+            <div class="addr">Av. Ejemplo 123, Bogotá</div>
+            <div class="meta">📦 Papel / Cartón · 25 kg est. · 08:00 - 10:00</div>
+          </div>
+          <span class="badge badge-pending">Pendiente</span>
+        </div>
+        <div class="route-card">
+          <div class="route-dot camino">🚚</div>
+          <div class="route-info">
+            <div class="addr">Calle 45 #12-30, Chapinero</div>
+            <div class="meta">🧴 Plásticos · 20 kg est. · 10:30 - 12:30</div>
+          </div>
+          <span class="badge badge-camino">En camino</span>
+        </div>
+        <div class="route-card">
+          <div class="route-dot done">✓</div>
+          <div class="route-info">
+            <div class="addr">Cra 7 #80-20, Usaquén</div>
+            <div class="meta">🫙 Vidrio · 30 kg est. · 13:30 - 15:30</div>
+          </div>
+          <span class="badge badge-done">Completada</span>
+        </div>
+        <div class="route-card">
+          <div class="route-dot pending">📍</div>
+          <div class="route-info">
+            <div class="addr">Calle 100 #15-40, Bogotá</div>
+            <div class="meta">🥫 Metales · 45 kg est. · 16:00 - 18:00</div>
+          </div>
+          <span class="badge badge-pending">Pendiente</span>
+        </div>
       </div>
-      <h2>Bienvenido</h2>
-      <p>Inicia sesión para agendar recolecciones y acumular puntos</p>
+      <div class="map-placeholder">
+        🗺️ Mapa de ruta del día
+        <div style="position:absolute;font-size:0.75rem;bottom:10px;left:0;right:0;text-align:center">
+          <span style="color:#856404">● Pendiente</span> &nbsp;
+          <span style="color:#004085">● En camino</span> &nbsp;
+          <span style="color:var(--g)">● Completada</span>
+        </div>
+      </div>
+      <button class="btn-full" onclick="toast('Ruta iniciada 🚚')">➤ Iniciar ruta</button>
+    </div>
+  </div>
 
-      <button class="btn-google" onclick="startGoogleLogin()">
+  <nav class="bottom-nav" id="bottomNav">
+    <button class="bn-item active" data-p="dashboard" onclick="go('dashboard')"><span class="ico">🏠</span>Inicio</button>
+    <button class="bn-item" data-p="solicitar" onclick="go('solicitar')"><span class="ico">📅</span>Agenda</button>
+    <button class="bn-item" data-p="historial" onclick="go('historial')"><span class="ico">📋</span>Historial</button>
+    <button class="bn-item" data-p="impacto" onclick="go('impacto')"><span class="ico">🌱</span>Impacto</button>
+    <button class="bn-item" data-p="perfil" onclick="go('perfil')"><span class="ico">👤</span>Perfil</button>
+  </nav>
+
+  <div class="overlay" id="loginModal">
+    <div class="modal">
+      <button class="close-x" onclick="closeLogin()">×</button>
+      <div class="logo" style="justify-content:center;margin-bottom:16px"><div class="logo-mark">♻</div> Ruta Circular</div>
+      <h2>Bienvenido</h2>
+      <p>Inicia sesión para agendar y ver tu impacto</p>
+      <button class="btn-g" style="width:100%;justify-content:center;padding:12px;margin-bottom:12px" onclick="startGoogleLogin()">
         <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
         Continuar con Google
       </button>
-
-      <div class="divider">o</div>
-
-      <input type="email" placeholder="Correo electrónico" id="emailInput">
-      <input type="password" placeholder="Contraseña" id="passInput">
-      <button class="btn-primary" id="btnEmailLogin" style="width:100%; margin-top:6px;" onclick="simulateEmailLogin()">Iniciar sesión</button>
+      <div style="display:flex;align-items:center;gap:10px;margin:14px 0;color:#999;font-size:0.8rem">
+        <div style="flex:1;height:1px;background:var(--border)"></div>o<div style="flex:1;height:1px;background:var(--border)"></div>
+      </div>
+      <input type="email" id="emailIn" placeholder="Correo electrónico">
+      <input type="password" id="passIn" placeholder="Contraseña">
+      <button class="btn-primary" style="width:100%;padding:13px;margin-top:6px" onclick="emailLogin()">Iniciar sesión</button>
     </div>
   </div>
 
-  <!-- CHATBOT -->
-  <button class="chat-toggle" id="chatToggle" onclick="toggleChat()">💬</button>
-  <div class="chat-window" id="chatWindow">
-    <div class="chat-header">
-      <div class="avatar">🤖</div>
-      <div>
-        <h3>Asistente Circular</h3>
-        <p>Te ayudo a identificar qué es aprovechable</p>
-      </div>
+  <button class="chat-btn" id="chatBtn" onclick="toggleChat()">💬</button>
+  <div class="chat-win" id="chatWin">
+    <div class="chat-hd">
+      <div style="width:36px;height:36px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center">🤖</div>
+      <div><div style="font-weight:700;font-size:0.95rem">Asistente Circular</div><div style="font-size:0.72rem;opacity:0.85">Identifica materiales aprovechables</div></div>
     </div>
-    <div class="chat-messages" id="chatMessages">
-      <div class="message bot">
-        ¡Hola! 👋 Soy el Asistente de Ruta Circular.<br><br>
-        Puedo ayudarte a saber si algo es <strong>aprovechable</strong> según la normativa colombiana.<br><br>
-        📸 Envíame una foto o descríbemelo por texto.
-      </div>
+    <div class="chat-msgs" id="chatMsgs">
+      <div class="msg bot">¡Hola! 👋 Envíame una foto o describe el material y te digo si es aprovechable según la normativa colombiana.</div>
     </div>
-    <div class="chat-input-area">
-      <button class="photo-btn" onclick="document.getElementById('photoInput').click()" title="Subir foto">📷</button>
-      <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="handlePhoto(event)">
-      <input type="text" id="chatInput" placeholder="Escribe o sube una foto..." onkeypress="if(event.key==='Enter')sendMessage()">
-      <button onclick="sendMessage()">➤</button>
+    <div class="chat-in">
+      <button style="background:var(--g3);color:var(--g)" onclick="document.getElementById('photoIn').click()">📷</button>
+      <input type="file" id="photoIn" accept="image/*" style="display:none" onchange="onPhoto(event)">
+      <input type="text" id="chatIn" placeholder="Escribe o sube foto..." onkeypress="if(event.key==='Enter')sendChat()">
+      <button onclick="sendChat()">➤</button>
     </div>
   </div>
 
   <div class="toast" id="toast"></div>
 
   <script>
-    // ========== STATE ==========
-    let currentUser = null;
-    let selectedMaterials = [];
-    const GOOGLE_CLIENT_ID = '1007467540717-emdpnoc49v46c6j783itp1v60idjmah7.apps.googleusercontent.com';
+    const CLIENT_ID = '1007467540717-emdpnoc49v46c6j783itp1v60idjmah7.apps.googleusercontent.com';
+    let user = null;
+    let mats = [];
 
-    // ========== NAV & PAGES ==========
-    function showPage(name) {
+    function go(page) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-      const page = document.getElementById('page-' + name);
-      if (page) page.classList.add('active');
-      window.scrollTo(0, 0);
-      if (name === 'dashboard' || name === 'historial' || name === 'perfil') updateUI();
-    }
-
-    function requireLogin(page) {
-      if (!currentUser) {
-        openLoginModal();
-        return;
-      }
-      showPage(page);
-    }
-
-    // ========== USER DATA (localStorage) ==========
-    function getUserData() {
-      if (!currentUser) return null;
-      const key = 'rutaData_' + (currentUser.email || currentUser.name);
-      let data = localStorage.getItem(key);
-      if (!data) {
-        data = JSON.stringify({ points: 0, kg: 0, co2: 0, history: [] });
-        localStorage.setItem(key, data);
-      }
-      return JSON.parse(data);
-    }
-
-    function saveUserData(data) {
-      if (!currentUser) return;
-      const key = 'rutaData_' + (currentUser.email || currentUser.name);
-      localStorage.setItem(key, JSON.stringify(data));
-    }
-
-    // ========== LOGIN ==========
-    function openLoginModal() {
-      document.getElementById('loginModal').classList.add('open');
-    }
-    function closeLoginModal() {
-      document.getElementById('loginModal').classList.remove('open');
-    }
-
-    function loginSuccess(name, avatar, email) {
-      currentUser = { name, avatar, email: email || (name.toLowerCase() + '@email.com') };
-      localStorage.setItem('rutaUser', JSON.stringify(currentUser));
-
-      document.getElementById('userName').textContent = name;
-      document.getElementById('userAvatar').src = avatar;
-      document.getElementById('userChip').classList.add('visible');
-      document.getElementById('btnGoogleNav').style.display = 'none';
-      document.getElementById('btnLogin').style.display = 'none';
-      document.getElementById('btnLogout').style.display = 'inline-block';
-
-      // Show logged-in nav
-      ['navDash','navSolicitar','navHistorial','navPerfil'].forEach(id => {
-        document.getElementById(id).style.display = 'inline';
+      document.getElementById('page-' + page)?.classList.add('active');
+      document.querySelectorAll('.bn-item').forEach(b => {
+        b.classList.toggle('active', b.dataset.p === page);
       });
+      window.scrollTo(0,0);
+      if (['dashboard','impacto','historial','perfil'].includes(page)) refresh();
+    }
+    function needLogin(page) {
+      if (!user) { openLogin(); return; }
+      go(page);
+    }
 
-      closeLoginModal();
-      updateUI();
-      showPage('dashboard');
-      showToast('¡Bienvenido/a ' + name + '!');
+    function key() { return 'rc_' + (user?.email || user?.name || 'anon'); }
+    function load() {
+      const d = localStorage.getItem(key());
+      return d ? JSON.parse(d) : { points:0, kg:0, co2:0, history:[] };
+    }
+    function save(d) { localStorage.setItem(key(), JSON.stringify(d)); }
+
+    function refresh() {
+      if (!user) return;
+      const d = load();
+      const goal = 50;
+      const pct = Math.min(100, Math.round((d.kg / goal) * 100));
+
+      document.getElementById('homePoints').textContent = d.points.toLocaleString();
+      document.getElementById('homeKg').textContent = d.kg + ' kg';
+      document.getElementById('homeCo2').textContent = d.co2 + ' kg';
+
+      document.getElementById('dashName').textContent = user.name;
+      document.getElementById('dashPoints').textContent = d.points.toLocaleString();
+      document.getElementById('pointsBar').style.width = Math.min(100, (d.points / 2000) * 100) + '%';
+      document.getElementById('pointsHint').textContent = d.points >= 2000 ? '¡Meta alcanzada!' : 'Faltan ' + (2000 - d.points) + ' puntos para tu próximo premio';
+      document.getElementById('dashKg').textContent = d.kg;
+      document.getElementById('dashCo2').textContent = d.co2;
+
+      const pending = d.history.filter(h => h.status === 'Pendiente').slice(-1)[0];
+      const nc = document.getElementById('nextContent');
+      if (pending) {
+        nc.innerHTML = '<div class="next-row">📅 ' + pending.fecha + '</div><div class="next-row">🕐 ' + pending.hora + '</div><div class="next-row">📍 ' + pending.dir + '</div><div class="status-ok">✓ Confirmada · ¡Te esperamos!</div>';
+      } else {
+        nc.innerHTML = '<div style="color:var(--muted);font-size:0.9rem">No tienes recolecciones pendientes</div><button class="btn-primary" style="margin-top:10px;padding:8px 16px;font-size:0.85rem" onclick="go(\'solicitar\')">Agendar una</button>';
+      }
+
+      document.getElementById('impactPct').textContent = pct + '%';
+      document.getElementById('impactKgBig').textContent = d.kg + ' kg';
+      document.getElementById('eqTrees').textContent = Math.round(d.co2 / 20) || 0;
+      document.getElementById('eqCo2').textContent = d.co2 + ' kg';
+      document.getElementById('progressCircle').style.strokeDashoffset = 377 - (377 * pct / 100);
+
+      renderHist(d.history);
+
+      document.getElementById('perfilImg').src = user.avatar;
+      document.getElementById('perfilName').textContent = user.name;
+      document.getElementById('perfilEmail').textContent = user.email;
+      document.getElementById('pPts').textContent = d.points.toLocaleString();
+      document.getElementById('pKg').textContent = d.kg + ' kg';
+    }
+
+    function renderHist(hist) {
+      const icons = { 'Cartón':'📦', 'Plástico':'🧴', 'Vidrio':'🫙', 'Metal':'🥫', 'Papel':'📄', 'Otros':'♻️' };
+      const html = (hist.length ? hist.slice().reverse() : []).map(h => 
+        '<div class="history-item"><div class="hi-icon">' + (icons[h.mats[0]] || '♻️') + '</div><div class="hi-info"><div class="t">' + h.mats.join(', ') + '</div><div class="d">' + h.fecha + ' · ' + h.kg + ' kg · ' + h.status + '</div></div><div class="hi-pts">+' + h.pts + ' pts</div></div>'
+      ).join('') || '<div style="padding:30px;text-align:center;color:var(--muted)">Sin recolecciones aún</div>';
+      document.getElementById('impactHistory').innerHTML = html;
+      document.getElementById('fullHistory').innerHTML = html;
+    }
+
+    function openLogin() { document.getElementById('loginModal').classList.add('open'); }
+    function closeLogin() { document.getElementById('loginModal').classList.remove('open'); }
+
+    function onLogin(name, avatar, email) {
+      user = { name: name, avatar: avatar, email: email || name.toLowerCase()+'@mail.com' };
+      localStorage.setItem('rc_user', JSON.stringify(user));
+      document.getElementById('btnGoogle').style.display = 'none';
+      document.getElementById('btnLogin').style.display = 'none';
+      document.getElementById('avatarBtn').style.display = 'block';
+      document.getElementById('navAvatar').src = avatar;
+      document.getElementById('bottomNav').classList.add('visible');
+      closeLogin();
+      refresh();
+      go('dashboard');
+      toast('¡Hola ' + name + '! 🌱');
     }
 
     function logout() {
-      currentUser = null;
-      localStorage.removeItem('rutaUser');
-      document.getElementById('userChip').classList.remove('visible');
-      document.getElementById('btnGoogleNav').style.display = 'flex';
+      user = null;
+      localStorage.removeItem('rc_user');
+      document.getElementById('btnGoogle').style.display = 'flex';
       document.getElementById('btnLogin').style.display = 'inline-block';
-      document.getElementById('btnLogout').style.display = 'none';
-      ['navDash','navSolicitar','navHistorial','navPerfil'].forEach(id => {
-        document.getElementById(id).style.display = 'none';
-      });
-      showPage('home');
-      showToast('Sesión cerrada');
+      document.getElementById('avatarBtn').style.display = 'none';
+      document.getElementById('bottomNav').classList.remove('visible');
+      go('home');
+      toast('Sesión cerrada');
     }
 
-    function simulateEmailLogin() {
-      const email = document.getElementById('emailInput').value.trim();
-      const password = document.getElementById('passInput').value;
-      if (!email || !email.includes('@')) { alert('Escribe un correo válido'); return; }
-      if (!password || password.length < 4) { alert('La contraseña debe tener al menos 4 caracteres'); return; }
-
-      const btn = document.getElementById('btnEmailLogin');
-      btn.textContent = 'Iniciando...';
-      btn.disabled = true;
-
-      setTimeout(() => {
-        let name = email.split('@')[0];
-        name = name.charAt(0).toUpperCase() + name.slice(1);
-        const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=00a86b&color=fff&size=128`;
-        loginSuccess(name, avatar, email);
-        btn.textContent = 'Iniciar sesión';
-        btn.disabled = false;
-      }, 800);
+    function emailLogin() {
+      const e = document.getElementById('emailIn').value.trim();
+      const p = document.getElementById('passIn').value;
+      if (!e.includes('@')) return alert('Correo inválido');
+      if (p.length < 4) return alert('Contraseña mínimo 4 caracteres');
+      const n = e.split('@')[0];
+      const name = n.charAt(0).toUpperCase() + n.slice(1);
+      onLogin(name, 'https://ui-avatars.com/api/?name=' + name + '&background=00a86b&color=fff', e);
     }
 
-    // Google Login
     function startGoogleLogin() {
-      closeLoginModal();
-      if (typeof google === 'undefined' || !google.accounts) {
-        // Fallback si no carga el script
-        const name = 'Usuario Google';
-        const avatar = 'https://ui-avatars.com/api/?name=Usuario&background=00a86b&color=fff&size=128';
-        loginSuccess(name, avatar, 'usuario@gmail.com');
+      closeLogin();
+      if (typeof google === 'undefined') {
+        onLogin('Usuario', 'https://ui-avatars.com/api/?name=U&background=00a86b&color=fff', 'user@gmail.com');
         return;
       }
-      google.accounts.id.initialize({
-        client_id: GOOGLE_CLIENT_ID,
-        callback: handleGoogleCredentialResponse,
-        auto_select: false
-      });
-      google.accounts.id.prompt((notification) => {
-        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+      google.accounts.id.initialize({ client_id: CLIENT_ID, callback: function(r) {
+        try {
+          var d = JSON.parse(atob(r.credential.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+          onLogin(d.given_name || d.name.split(' ')[0], d.picture, d.email);
+        } catch(e) { toast('Error al procesar login'); }
+      }});
+      google.accounts.id.prompt(function(n) {
+        if (n.isNotDisplayed() || n.isSkippedMoment()) {
           google.accounts.oauth2.initTokenClient({
-            client_id: GOOGLE_CLIENT_ID,
-            scope: 'email profile openid',
-            callback: (tokenResponse) => {
-              if (tokenResponse && tokenResponse.access_token) {
-                fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-                  headers: { Authorization: 'Bearer ' + tokenResponse.access_token }
-                }).then(r => r.json()).then(data => {
-                  loginSuccess(data.given_name || data.name.split(' ')[0], data.picture, data.email);
-                });
-              }
+            client_id: CLIENT_ID, scope: 'email profile',
+            callback: function(t) {
+              fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: 'Bearer ' + t.access_token }})
+                .then(function(r) { return r.json(); })
+                .then(function(d) { onLogin(d.given_name || d.name.split(' ')[0], d.picture, d.email); });
             }
           }).requestAccessToken();
         }
       });
     }
 
-    function handleGoogleCredentialResponse(response) {
-      const data = parseJwt(response.credential);
-      loginSuccess(data.given_name || data.name.split(' ')[0], data.picture, data.email);
-    }
-
-    function parseJwt(token) {
-      try {
-        const base64Url = token.split('.')[1];
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        return JSON.parse(decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
-      } catch(e) { return {}; }
-    }
-
-    // ========== UPDATE UI ==========
-    function updateUI() {
-      if (!currentUser) return;
-      const data = getUserData();
-
-      // Dashboard
-      document.getElementById('dashName').textContent = currentUser.name;
-      document.getElementById('statPoints').textContent = data.points.toLocaleString();
-      document.getElementById('statKg').textContent = data.kg;
-      document.getElementById('statCo2').textContent = data.co2 + ' kg';
-      document.getElementById('statCount').textContent = data.history.length;
-
-      // Progress
-      const goal = 20;
-      const pct = Math.min(100, (data.kg / goal) * 100);
-      document.getElementById('progressBar').style.width = pct + '%';
-      document.getElementById('progressText').textContent = data.kg + ' / ' + goal + ' kg';
-
-      // Hero
-      document.getElementById('heroPoints').textContent = data.points.toLocaleString();
-      document.getElementById('heroKg').textContent = data.kg + ' kg';
-      document.getElementById('heroCo2').textContent = data.co2 + ' kg';
-
-      // Profile
-      document.getElementById('perfilAvatar').src = currentUser.avatar;
-      document.getElementById('perfilNombre').textContent = currentUser.name;
-      document.getElementById('perfilEmail').textContent = currentUser.email;
-      document.getElementById('perfilPuntos').textContent = data.points.toLocaleString();
-      document.getElementById('perfilKg').textContent = data.kg + ' kg';
-
-      // History
-      renderHistory(data.history);
-    }
-
-    function renderHistory(history) {
-      const dashEl = document.getElementById('dashHistory');
-      const fullEl = document.getElementById('fullHistory');
-
-      if (!history.length) {
-        dashEl.innerHTML = `<div class="empty-state"><div class="icon">📦</div><p>Aún no tienes recolecciones.<br>¡Agenda tu primera!</p><button class="btn-primary" style="margin-top:16px;" onclick="showPage('solicitar')">Solicitar ahora</button></div>`;
-        fullEl.innerHTML = `<div class="empty-state"><div class="icon">📋</div><p>Aún no tienes historial de recolecciones.</p></div>`;
-        return;
-      }
-
-      const items = history.slice().reverse().map(h => `
-        <div class="history-item">
-          <div class="hi-left">
-            <div class="hi-title">${h.materials.join(', ')}</div>
-            <div class="hi-date">${h.fecha} · ${h.hora}</div>
-          </div>
-          <div style="text-align:right;">
-            <div class="hi-kg">${h.kg} kg</div>
-            <span class="badge ${h.status === 'Completada' ? 'badge-success' : 'badge-pending'}">${h.status}</span>
-          </div>
-        </div>
-      `).join('');
-
-      dashEl.innerHTML = history.slice().reverse().slice(0, 4).map(h => `
-        <div class="history-item">
-          <div class="hi-left">
-            <div class="hi-title">${h.materials.join(', ')}</div>
-            <div class="hi-date">${h.fecha} · ${h.hora}</div>
-          </div>
-          <div style="text-align:right;">
-            <div class="hi-kg">${h.kg} kg</div>
-            <span class="badge ${h.status === 'Completada' ? 'badge-success' : 'badge-pending'}">${h.status}</span>
-          </div>
-        </div>
-      `).join('');
-
-      fullEl.innerHTML = items;
-    }
-
-    // ========== SOLICITAR RECOLECCIÓN ==========
-    function toggleMaterial(el) {
+    function togMat(el) {
       el.classList.toggle('selected');
-      const mat = el.dataset.mat;
-      if (el.classList.contains('selected')) {
-        if (!selectedMaterials.includes(mat)) selectedMaterials.push(mat);
-      } else {
-        selectedMaterials = selectedMaterials.filter(m => m !== mat);
-      }
+      var m = el.dataset.m;
+      if (el.classList.contains('selected')) { if (mats.indexOf(m) === -1) mats.push(m); }
+      else mats = mats.filter(function(x) { return x !== m; });
     }
 
-    function submitRecoleccion() {
-      if (!currentUser) { openLoginModal(); return; }
-      if (selectedMaterials.length === 0) { alert('Selecciona al menos un material'); return; }
+    function submitReq() {
+      if (!user) return openLogin();
+      if (!mats.length) return alert('Selecciona al menos un material');
+      var kg = +document.getElementById('inputKg').value || 5;
+      var fecha = document.getElementById('inputFecha').value || new Date().toISOString().slice(0,10);
+      var hora = document.getElementById('inputHora').value;
+      var dir = document.getElementById('inputDir').value || 'Dirección no especificada';
+      var code = 'RC-' + Date.now().toString().slice(-6);
+      var pts = Math.round(kg * 25);
 
-      const kg = parseFloat(document.getElementById('inputKg').value) || 1;
-      const fecha = document.getElementById('inputFecha').value || new Date().toISOString().slice(0,10);
-      const hora = document.getElementById('inputHora').value;
-      const direccion = document.getElementById('inputDireccion').value || 'Sin dirección';
+      var d = load();
+      d.history.push({ id: code, mats: mats.slice(), kg: kg, fecha: fecha, hora: hora, dir: dir, status: 'Pendiente', pts: pts });
+      d.kg = +(d.kg + kg).toFixed(1);
+      d.co2 = +(d.co2 + kg * 0.65).toFixed(1);
+      d.points += pts;
+      save(d);
 
-      const code = 'RC-' + Date.now().toString().slice(-6);
-      const data = getUserData();
+      document.getElementById('qrcode').innerHTML = '';
+      new QRCode(document.getElementById('qrcode'), { text: code, width: 160, height: 160 });
+      document.getElementById('cFecha').textContent = fecha;
+      document.getElementById('cHora').textContent = hora;
+      document.getElementById('cDir').textContent = dir;
+      document.getElementById('cMats').textContent = mats.join(', ') + ' · ' + kg + ' kg';
 
-      const item = {
-        id: code,
-        materials: [...selectedMaterials],
-        kg: kg,
-        fecha: fecha,
-        hora: hora,
-        direccion: direccion,
-        status: 'Pendiente',
-        puntos: Math.round(kg * 25)
-      };
-
-      data.history.push(item);
-      data.kg = +(data.kg + kg).toFixed(1);
-      data.co2 = +(data.co2 + kg * 0.7).toFixed(1);
-      data.points += item.puntos;
-      saveUserData(data);
-
-      // Show confirmation
-      document.getElementById('confirmCode').textContent = code;
-      document.getElementById('confirmDetails').textContent = `${selectedMaterials.join(', ')} · ${kg} kg · ${fecha}`;
-      document.getElementById('qrCode').textContent = '📱';
-
-      // Reset form
-      selectedMaterials = [];
-      document.querySelectorAll('.material-chip').forEach(c => c.classList.remove('selected'));
-      document.getElementById('inputKg').value = 3;
-      document.getElementById('inputDireccion').value = '';
-      document.getElementById('inputNotas').value = '';
-
-      showPage('confirmacion');
-      showToast('¡Recolección agendada! +' + item.puntos + ' puntos');
+      mats = [];
+      document.querySelectorAll('.mat').forEach(function(m) { m.classList.remove('selected'); });
+      go('confirm');
+      toast('¡Agendado! +' + pts + ' puntos 🌱');
     }
 
-    // ========== CHATBOT ==========
     function toggleChat() {
-      const win = document.getElementById('chatWindow');
-      const btn = document.getElementById('chatToggle');
-      win.classList.toggle('open');
-      btn.classList.toggle('open');
-      btn.textContent = win.classList.contains('open') ? '✕' : '💬';
+      document.getElementById('chatWin').classList.toggle('open');
     }
-
-    function addMessage(text, type = 'bot', imageUrl = null) {
-      const container = document.getElementById('chatMessages');
-      const div = document.createElement('div');
-      div.className = 'message ' + type;
-      div.innerHTML = text;
-      if (imageUrl) {
-        const img = document.createElement('img');
-        img.src = imageUrl;
-        div.appendChild(img);
-      }
-      container.appendChild(div);
-      container.scrollTop = container.scrollHeight;
+    function addMsg(html, type) {
+      var el = document.getElementById('chatMsgs');
+      var d = document.createElement('div');
+      d.className = 'msg ' + type;
+      d.innerHTML = html;
+      el.appendChild(d);
+      el.scrollTop = el.scrollHeight;
     }
-
-    function sendMessage() {
-      const input = document.getElementById('chatInput');
-      const text = input.value.trim();
-      if (!text) return;
-      addMessage(text, 'user');
-      input.value = '';
-      setTimeout(() => respondToText(text), 600);
+    function sendChat() {
+      var inp = document.getElementById('chatIn');
+      var t = inp.value.trim();
+      if (!t) return;
+      addMsg(t, 'user');
+      inp.value = '';
+      setTimeout(function() {
+        var l = t.toLowerCase();
+        var r = 'Puedo ayudarte a identificar materiales. Sube una foto 📷 o dime qué es.';
+        if (l.match(/hola|buenas/)) r = '¡Hola! 😊 ¿Qué material quieres identificar?';
+        else if (l.match(/plastic|botella|pet/)) r = '✅ <b>Aprovechable</b>. Plástico PET se recicla. Enjuágalo y agenda recolección.';
+        else if (l.match(/carton|papel|caja/)) r = '✅ <b>Aprovechable</b>. Papel/cartón limpio es excelente para reciclar.';
+        else if (l.match(/vidrio/)) r = '✅ <b>Aprovechable</b>. Vidrio 100% reciclable (no espejos ni cerámica).';
+        else if (l.match(/lata|metal|aluminio/)) r = '✅ <b>Aprovechable</b>. Metales tienen alto valor de recuperación.';
+        else if (l.match(/organico|comida|cascara/)) r = '❌ No aprovechable en Ruta Circular. Va en residuales/compostaje.';
+        addMsg(r, 'bot');
+      }, 500);
     }
-
-    function handlePhoto(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        addMessage('📷 Foto enviada', 'user', ev.target.result);
-        setTimeout(() => analyzePhoto(file.name), 1000);
+    function onPhoto(e) {
+      var f = e.target.files[0];
+      if (!f) return;
+      var r = new FileReader();
+      r.onload = function() {
+        addMsg('📷 Foto enviada', 'user');
+        setTimeout(function() {
+          var n = f.name.toLowerCase();
+          var msg = 'Según normativa colombiana (Res. 2184/2019), los aprovechables son papel, cartón, plástico, vidrio y metal.';
+          if (n.match(/botella|plastic|pet/)) msg = '✅ <b>Aprovechable</b> — Plástico PET. Enjuágalo y agenda.';
+          else if (n.match(/carton|caja|papel/)) msg = '✅ <b>Aprovechable</b> — Papel/cartón limpio.';
+          else if (n.match(/vidrio|frasco/)) msg = '✅ <b>Aprovechable</b> — Vidrio reciclable.';
+          else if (n.match(/lata|metal/)) msg = '✅ <b>Aprovechable</b> — Metal/aluminio.';
+          else if (n.match(/comida|organico|resto/)) msg = '❌ No aprovechable aquí. Son orgánicos.';
+          addMsg(msg, 'bot');
+        }, 900);
       };
-      reader.readAsDataURL(file);
+      r.readAsDataURL(f);
       e.target.value = '';
     }
 
-    function analyzePhoto(filename) {
-      const name = filename.toLowerCase();
-      let response = '';
-      if (name.match(/botella|plastic|pet|vaso/)) {
-        response = `✅ <strong>Aprovechable</strong><br><br>Plástico PET reciclable según normativa colombiana.<br>• Enjuágalo<br>• Va en bolsa de aprovechables<br>¡Puedes agendar su recolección!`;
-      } else if (name.match(/carton|caja|papel|periodico|revista/)) {
-        response = `✅ <strong>Aprovechable</strong><br><br>Papel/cartón limpio es excelente para reciclar.<br>• Debe estar seco<br>• Retira cintas si es posible`;
-      } else if (name.match(/vidrio|frasco/)) {
-        response = `✅ <strong>Aprovechable</strong><br><br>El vidrio es 100% reciclable.<br>• Enjuágalo<br>• No mezclar con cerámica o espejos`;
-      } else if (name.match(/lata|aluminio|metal/)) {
-        response = `✅ <strong>Aprovechable</strong><br><br>Metales y aluminio tienen alto valor de recuperación.`;
-      } else if (name.match(/organico|comida|cascara|resto/)) {
-        response = `❌ <strong>No aprovechable aquí</strong><br><br>Los orgánicos no se recolectan en Ruta Circular. Van en bolsa de residuales/compostaje.`;
-      } else {
-        response = `Según la <strong>Resolución 2184 de 2019</strong>, los aprovechables son: papel, cartón, plástico, vidrio y metal.<br><br>¿Puedes describirme mejor el material?`;
-      }
-      addMessage(response, 'bot');
-    }
-
-    function respondToText(text) {
-      const t = text.toLowerCase();
-      let r = '';
-      if (t.match(/hola|buenas|hey/)) r = '¡Hola! 😊 ¿En qué te ayudo? Puedes enviarme una foto o preguntarme sobre materiales.';
-      else if (t.match(/plastico|botella|pet/)) r = '✅ Las botellas PET sí son aprovechables. Enjuágalas y agenda su recolección.';
-      else if (t.match(/carton|papel|caja/)) r = '✅ Papel y cartón limpios son excelentes. Evita que estén grasosos.';
-      else if (t.match(/vidrio/)) r = '✅ El vidrio es 100% reciclable. Solo que no sea espejo ni cerámica.';
-      else if (t.match(/organico|comida/)) r = '❌ Los orgánicos no los recolectamos. Van en bolsa de residuales.';
-      else if (t.match(/punto|ganar|recompensa/)) r = '¡Cada kilo te suma puntos! Aproxima 25 puntos por kilo de material aprovechable.';
-      else r = 'Puedo ayudarte a identificar materiales. <strong>Sube una foto</strong> 📷 o dime qué es (botella, cartón, restos de comida…).';
-      addMessage(r, 'bot');
-    }
-
-    // ========== UTILS ==========
-    function showToast(msg) {
-      const t = document.getElementById('toast');
-      t.textContent = msg;
+    function toast(m) {
+      var t = document.getElementById('toast');
+      t.textContent = m;
       t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 3000);
+      setTimeout(function() { t.classList.remove('show'); }, 2800);
     }
 
-    // Set min date to today
-    document.getElementById('inputFecha').min = new Date().toISOString().slice(0,10);
     document.getElementById('inputFecha').value = new Date().toISOString().slice(0,10);
+    document.getElementById('inputFecha').min = new Date().toISOString().slice(0,10);
 
-    // Restore session
-    window.addEventListener('load', () => {
-      const saved = localStorage.getItem('rutaUser');
-      if (saved) {
+    window.addEventListener('load', function() {
+      var s = localStorage.getItem('rc_user');
+      if (s) {
         try {
-          const u = JSON.parse(saved);
-          currentUser = u;
-          document.getElementById('userName').textContent = u.name;
-          document.getElementById('userAvatar').src = u.avatar;
-          document.getElementById('userChip').classList.add('visible');
-          document.getElementById('btnGoogleNav').style.display = 'none';
+          user = JSON.parse(s);
+          document.getElementById('btnGoogle').style.display = 'none';
           document.getElementById('btnLogin').style.display = 'none';
-          document.getElementById('btnLogout').style.display = 'inline-block';
-          ['navDash','navSolicitar','navHistorial','navPerfil'].forEach(id => {
-            document.getElementById(id).style.display = 'inline';
-          });
-          updateUI();
+          document.getElementById('avatarBtn').style.display = 'block';
+          document.getElementById('navAvatar').src = user.avatar;
+          document.getElementById('bottomNav').classList.add('visible');
+          refresh();
         } catch(e) {}
       }
-
-      // Navbar scroll
-      window.addEventListener('scroll', () => {
-        document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 30);
-      });
-    });
-
-    // Enter en login
-    document.getElementById('passInput')?.addEventListener('keypress', e => {
-      if (e.key === 'Enter') simulateEmailLogin();
     });
   </script>
 </body>
