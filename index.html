@@ -3,10 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://ui-avatars.com https://*.googleusercontent.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>Ruta Circular</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <!-- TODO SRI: genera el hash de cada script en https://www.srihash.org y agrégalo como integrity="sha384-..." crossorigin="anonymous" -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   <style>
     :root {
@@ -395,6 +398,8 @@
     .privacy-page h2 { font-family: 'Poppins', sans-serif; font-size: 1.05rem; margin: 22px 0 8px; color: var(--g); }
     .privacy-page p, .privacy-page li { font-size: 0.9rem; color: var(--muted); line-height: 1.6; margin-bottom: 8px; }
     .privacy-page ul { padding-left: 18px; margin-bottom: 12px; }
+    /* fix: el aviso oculto ya no bloquea clics en la parte baja de la pantalla */
+    .privacy-overlay:not(.open), .privacy-overlay:not(.open) .privacy-box { pointer-events: none; visibility: hidden; }
 
   </style>
 </head>
@@ -715,7 +720,7 @@
       <p>Puedes conocer, actualizar, rectificar y suprimir tus datos, o revocar la autorización, escribiendo al correo de contacto del proyecto o cerrando sesión y solicitando eliminación de la información almacenada en tu dispositivo.</p>
 
       <h2>6. Seguridad</h2>
-      <p>Aplicamos medidas razonables de seguridad. Parte de la información se almacena localmente en tu navegador (localStorage) para el funcionamiento del prototipo.</p>
+      <p>Aplicamos medidas razonables de seguridad. Tus datos (perfil e historial de recolecciones) se guardan en una base de datos con acceso restringido: solo tú puedes ver tu información. En tu navegador solo guardamos tu sesión y tu decisión sobre este aviso.</p>
 
       <h2>7. Aceptación</h2>
       <p>Al hacer clic en “Acepto el tratamiento” autorizas el uso de tus datos conforme a esta política y a la normativa colombiana vigente.</p>
@@ -745,9 +750,10 @@
       <div style="display:flex;align-items:center;gap:10px;margin:14px 0;color:#999;font-size:0.8rem">
         <div style="flex:1;height:1px;background:var(--border)"></div>o<div style="flex:1;height:1px;background:var(--border)"></div>
       </div>
-      <input type="email" id="emailIn" placeholder="Correo electrónico">
-      <input type="password" id="passIn" placeholder="Contraseña">
-      <button class="btn-primary" style="width:100%;padding:13px;margin-top:6px" onclick="emailLogin()">Iniciar sesión</button>
+      <input type="email" id="emailIn" placeholder="Correo electrónico" autocomplete="email" maxlength="254">
+      <input type="password" id="passIn" placeholder="Contraseña" autocomplete="current-password" maxlength="72">
+      <button class="btn-primary" id="authSubmit" style="width:100%;padding:13px;margin-top:6px" onclick="emailAuth()">Iniciar sesión</button>
+      <button type="button" id="authToggle" style="background:none;color:var(--g);font-size:0.85rem;font-weight:600;margin-top:12px;width:100%" onclick="toggleAuthMode()">¿No tienes cuenta? Regístrate</button>
     </div>
   </div>
 
@@ -791,39 +797,91 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    const CLIENT_ID = '1007467540717-emdpnoc49v46c6j783itp1v60idjmah7.apps.googleusercontent.com';
+    /* ============================================================
+       CONFIGURACIÓN DE SUPABASE
+       Supabase > Project Settings > API
+       La "anon key" es PÚBLICA por diseño (la seguridad la da el RLS).
+       NUNCA pongas aquí la "service_role key".
+       ============================================================ */
+    const SUPABASE_URL = 'https://angjuuhymirjmmtzxzdz.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFuZ2p1dWh5bWlyam1tdHp4emR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQyNzAxMDEsImV4cCI6MjEwOTg0NjEwMX0.xlk9y0-oGhLMrHGYBO4NPBdgzr3PYXb0lfBJKDMZBB0';
+
+    const CONFIGURED = !SUPABASE_URL.includes('TU-PROYECTO');
+    const sb = (CONFIGURED && window.supabase)
+      ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+      : null;
+
+    const MATERIALES = ['Cartón', 'Plástico', 'Vidrio', 'Metal', 'Papel', 'Otros'];
+    const HORAS = ['08:00 - 10:00', '10:00 - 12:00', '12:00 - 14:00', '14:00 - 16:00', '16:00 - 18:00'];
+
     let user = null;
     let mats = [];
+    let data = { points: 0, kg: 0, co2: 0, history: [] };
+    let busy = false;
 
+    /* ---------- utilidades de seguridad ---------- */
+    function esc(s) {
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+    function safeUrl(u, fallback) {
+      try { var x = new URL(u); if (x.protocol === 'https:') return x.href; } catch (e) {}
+      return fallback;
+    }
+    function avatarFor(name, url) {
+      var fb = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(name) + '&background=00a86b&color=fff';
+      return url ? safeUrl(url, fb) : fb;
+    }
+    function today() {
+      var d = new Date();
+      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+    function fail(msg) { toast(msg); }
+
+    /* ---------- navegación ---------- */
     function go(page) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
       document.getElementById('page-' + page)?.classList.add('active');
       document.querySelectorAll('.bn-item').forEach(b => {
         b.classList.toggle('active', b.dataset.p === page);
       });
-      window.scrollTo(0,0);
-      if (['dashboard','impacto','historial','perfil'].includes(page)) refresh();
+      window.scrollTo(0, 0);
+      if (['dashboard', 'impacto', 'historial', 'perfil'].includes(page)) refresh();
     }
     function needLogin(page) {
       if (!user) { openLogin(); return; }
       go(page);
     }
 
-    function key() { return 'rc_' + (user?.email || user?.name || 'anon'); }
-    function load() {
-      const d = localStorage.getItem(key());
-      return d ? JSON.parse(d) : { points:0, kg:0, co2:0, history:[] };
+    /* ---------- datos del usuario (vienen de Supabase, protegidos por RLS) ---------- */
+    async function loadData() {
+      var empty = { points: 0, kg: 0, co2: 0, history: [] };
+      if (!sb || !user) return empty;
+      var res = await sb.from('pickups')
+        .select('code,materials,kg,fecha,hora,direccion,status,pts,co2,created_at')
+        .order('created_at', { ascending: true });
+      if (res.error) { fail('No se pudo cargar tu historial'); return empty; }
+      var rows = res.data || [];
+      var valid = rows.filter(r => r.status !== 'Cancelada');
+      return {
+        points: valid.reduce((a, r) => a + (r.pts || 0), 0),
+        kg: +valid.reduce((a, r) => a + Number(r.kg || 0), 0).toFixed(1),
+        co2: +valid.reduce((a, r) => a + Number(r.co2 || 0), 0).toFixed(1),
+        history: rows.map(r => ({
+          id: r.code, mats: r.materials || [], kg: Number(r.kg), fecha: r.fecha,
+          hora: r.hora, dir: r.direccion, status: r.status, pts: r.pts
+        }))
+      };
     }
-    function save(d) { localStorage.setItem(key(), JSON.stringify(d)); }
 
-    function refresh() {
+    async function refresh() {
+      renderCommunity();
       if (!user) return;
-      const d = load();
+      data = await loadData();
+      const d = data;
       const goal = 50;
       const pct = Math.min(100, Math.round((d.kg / goal) * 100));
-
-      /* home muestra impacto comunitario, no personal */
-      renderCommunity();
 
       document.getElementById('dashName').textContent = user.name;
       document.getElementById('dashPoints').textContent = d.points.toLocaleString();
@@ -835,7 +893,7 @@
       const pending = d.history.filter(h => h.status === 'Pendiente').slice(-1)[0];
       const nc = document.getElementById('nextContent');
       if (pending) {
-        nc.innerHTML = '<div class="next-row">📅 ' + pending.fecha + '</div><div class="next-row">🕐 ' + pending.hora + '</div><div class="next-row">📍 ' + pending.dir + '</div><div class="status-ok">✓ Confirmada · ¡Te esperamos!</div>';
+        nc.innerHTML = '<div class="next-row">📅 ' + esc(pending.fecha) + '</div><div class="next-row">🕐 ' + esc(pending.hora) + '</div><div class="next-row">📍 ' + esc(pending.dir) + '</div><div class="status-ok">✓ Confirmada · ¡Te esperamos!</div>';
       } else {
         nc.innerHTML = '<div style="color:var(--muted);font-size:0.9rem">No tienes recolecciones pendientes</div><button class="btn-primary" style="margin-top:10px;padding:8px 16px;font-size:0.85rem" onclick="go(\'solicitar\')">Agendar una</button>';
       }
@@ -856,135 +914,194 @@
     }
 
     function renderHist(hist) {
-      const icons = { 'Cartón':'📦', 'Plástico':'🧴', 'Vidrio':'🫙', 'Metal':'🥫', 'Papel':'📄', 'Otros':'♻️' };
-      const html = (hist.length ? hist.slice().reverse() : []).map(h => 
-        '<div class="history-item"><div class="hi-icon">' + (icons[h.mats[0]] || '♻️') + '</div><div class="hi-info"><div class="t">' + h.mats.join(', ') + '</div><div class="d">' + h.fecha + ' · ' + h.kg + ' kg · ' + h.status + '</div></div><div class="hi-pts">+' + h.pts + ' pts</div></div>'
+      const icons = { 'Cartón': '📦', 'Plástico': '🧴', 'Vidrio': '🫙', 'Metal': '🥫', 'Papel': '📄', 'Otros': '♻️' };
+      const html = (hist.length ? hist.slice().reverse() : []).map(h =>
+        '<div class="history-item"><div class="hi-icon">' + (icons[h.mats[0]] || '♻️') + '</div><div class="hi-info"><div class="t">' + esc(h.mats.join(', ')) + '</div><div class="d">' + esc(h.fecha) + ' · ' + esc(h.kg) + ' kg · ' + esc(h.status) + '</div></div><div class="hi-pts">+' + esc(h.pts) + ' pts</div></div>'
       ).join('') || '<div style="padding:30px;text-align:center;color:var(--muted)">Sin recolecciones aún</div>';
       document.getElementById('impactHistory').innerHTML = html;
       document.getElementById('fullHistory').innerHTML = html;
     }
 
-    function openLogin() { document.getElementById('loginModal').classList.add('open'); }
+    /* ---------- autenticación (Supabase Auth) ---------- */
+    function openLogin() {
+      if (!sb) { toast('Falta configurar Supabase en el código'); }
+      document.getElementById('loginModal').classList.add('open');
+    }
     function closeLogin() { document.getElementById('loginModal').classList.remove('open'); }
 
-    function onLogin(name, avatar, email) {
-      user = { name: name, avatar: avatar, email: email || name.toLowerCase()+'@mail.com' };
-      localStorage.setItem('rc_user', JSON.stringify(user));
-      registerUserInCommunity(user.email);
-      document.getElementById('btnGoogle').style.display = 'none';
-      document.getElementById('btnLogin').style.display = 'none';
-      document.getElementById('avatarBtn').style.display = 'block';
-      document.getElementById('navAvatar').src = avatar;
-      document.getElementById('bottomNav').classList.add('visible');
-      closeLogin();
-      refresh();
-      go('dashboard');
-      toast('¡Hola ' + name + '! 🌱');
+    let authMode = 'login';
+    function toggleAuthMode() {
+      authMode = authMode === 'login' ? 'signup' : 'login';
+      var signup = authMode === 'signup';
+      document.getElementById('authSubmit').textContent = signup ? 'Crear cuenta' : 'Iniciar sesión';
+      document.getElementById('authToggle').textContent = signup ? '¿Ya tienes cuenta? Inicia sesión' : '¿No tienes cuenta? Regístrate';
+      document.getElementById('passIn').autocomplete = signup ? 'new-password' : 'current-password';
+      document.getElementById('passIn').placeholder = signup ? 'Contraseña (mínimo 8 caracteres)' : 'Contraseña';
     }
 
-    function logout() {
+    function setLoggedInUI(on) {
+      document.getElementById('btnGoogle').style.display = on ? 'none' : 'flex';
+      document.getElementById('btnLogin').style.display = on ? 'none' : 'inline-block';
+      document.getElementById('avatarBtn').style.display = on ? 'block' : 'none';
+      document.getElementById('bottomNav').classList.toggle('visible', on);
+      if (on) document.getElementById('navAvatar').src = user.avatar;
+    }
+
+    function userFromSession(session) {
+      var u = session.user, m = u.user_metadata || {};
+      var email = u.email || '';
+      var name = String(m.full_name || m.name || email.split('@')[0] || 'Usuario').split(' ')[0];
+      name = name.charAt(0).toUpperCase() + name.slice(1);
+      return { id: u.id, name: name, email: email, avatar: avatarFor(name, m.avatar_url || m.picture) };
+    }
+
+    function handleSession(event, session) {
+      if (event === 'SIGNED_OUT' || !session) {
+        if (user) { user = null; data = { points: 0, kg: 0, co2: 0, history: [] }; setLoggedInUI(false); go('home'); }
+        return;
+      }
+      if (user && user.id === session.user.id) return;          /* mismo usuario: ignorar refrescos de token */
+      var fresh = event === 'SIGNED_IN';
+      user = userFromSession(session);
+      setLoggedInUI(true);
+      closeLogin();
+      refresh();
+      if (fresh) { go('dashboard'); toast('¡Hola ' + user.name + '! 🌱'); }
+    }
+
+    function initAuth() {
+      if (!sb) return;
+      /* No hacer llamadas a Supabase dentro del callback: se difieren con setTimeout */
+      sb.auth.onAuthStateChange(function (event, session) {
+        setTimeout(function () { handleSession(event, session); }, 0);
+      });
+    }
+
+    async function emailAuth() {
+      if (!sb || busy) return;
+      const e = document.getElementById('emailIn').value.trim().toLowerCase();
+      const p = document.getElementById('passIn').value;
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e) || e.length > 254) return alert('Correo inválido');
+      if (authMode === 'signup' && (p.length < 8 || p.length > 72)) return alert('La contraseña debe tener entre 8 y 72 caracteres');
+      if (!p) return alert('Escribe tu contraseña');
+      busy = true;
+      var btn = document.getElementById('authSubmit'); btn.disabled = true;
+      try {
+        if (authMode === 'signup') {
+          const r = await sb.auth.signUp({
+            email: e, password: p,
+            options: { emailRedirectTo: location.origin + location.pathname }
+          });
+          if (r.error) toast('No se pudo crear la cuenta. Revisa los datos e intenta de nuevo');
+          else if (!r.data.session) { closeLogin(); toast('📧 Revisa tu correo para confirmar tu cuenta'); }
+        } else {
+          const r = await sb.auth.signInWithPassword({ email: e, password: p });
+          if (r.error) toast('Correo o contraseña incorrectos');   /* mensaje genérico a propósito */
+        }
+      } finally {
+        busy = false; btn.disabled = false;
+        document.getElementById('passIn').value = '';
+      }
+    }
+
+    async function startGoogleLogin() {
+      if (!sb) { toast('Falta configurar Supabase en el código'); return; }
+      closeLogin();
+      const r = await sb.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: location.origin + location.pathname }
+      });
+      if (r.error) toast('No se pudo iniciar con Google');
+    }
+
+    async function logout() {
+      if (sb) await sb.auth.signOut();
       user = null;
-      localStorage.removeItem('rc_user');
-      document.getElementById('btnGoogle').style.display = 'flex';
-      document.getElementById('btnLogin').style.display = 'inline-block';
-      document.getElementById('avatarBtn').style.display = 'none';
-      document.getElementById('bottomNav').classList.remove('visible');
+      setLoggedInUI(false);
       go('home');
       toast('Sesión cerrada');
     }
 
-    function emailLogin() {
-      const e = document.getElementById('emailIn').value.trim();
-      const p = document.getElementById('passIn').value;
-      if (!e.includes('@')) return alert('Correo inválido');
-      if (p.length < 4) return alert('Contraseña mínimo 4 caracteres');
-      const n = e.split('@')[0];
-      const name = n.charAt(0).toUpperCase() + n.slice(1);
-      onLogin(name, 'https://ui-avatars.com/api/?name=' + name + '&background=00a86b&color=fff', e);
-    }
-
-    function startGoogleLogin() {
-      closeLogin();
-      if (typeof google === 'undefined') {
-        onLogin('Usuario', 'https://ui-avatars.com/api/?name=U&background=00a86b&color=fff', 'user@gmail.com');
-        return;
-      }
-      google.accounts.id.initialize({ client_id: CLIENT_ID, callback: function(r) {
-        try {
-          var d = JSON.parse(atob(r.credential.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
-          onLogin(d.given_name || d.name.split(' ')[0], d.picture, d.email);
-        } catch(e) { toast('Error al procesar login'); }
-      }});
-      google.accounts.id.prompt(function(n) {
-        if (n.isNotDisplayed() || n.isSkippedMoment()) {
-          google.accounts.oauth2.initTokenClient({
-            client_id: CLIENT_ID, scope: 'email profile',
-            callback: function(t) {
-              fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: 'Bearer ' + t.access_token }})
-                .then(function(r) { return r.json(); })
-                .then(function(d) { onLogin(d.given_name || d.name.split(' ')[0], d.picture, d.email); });
-            }
-          }).requestAccessToken();
-        }
-      });
-    }
-
+    /* ---------- solicitar recolección ---------- */
     function togMat(el) {
       el.classList.toggle('selected');
       var m = el.dataset.m;
       if (el.classList.contains('selected')) { if (mats.indexOf(m) === -1) mats.push(m); }
-      else mats = mats.filter(function(x) { return x !== m; });
+      else mats = mats.filter(function (x) { return x !== m; });
     }
 
-    function submitReq() {
+    async function submitReq() {
       if (!user) return openLogin();
-      if (!mats.length) return alert('Selecciona al menos un material');
-      var kg = +document.getElementById('inputKg').value || 5;
-      var fecha = document.getElementById('inputFecha').value || new Date().toISOString().slice(0,10);
+      if (busy) return;
+      var matsOk = mats.filter(function (m) { return MATERIALES.indexOf(m) !== -1; });
+      if (!matsOk.length) return alert('Selecciona al menos un material');
+
+      var kg = Number(document.getElementById('inputKg').value);
+      if (!isFinite(kg) || kg < 1 || kg > 200) return alert('La cantidad debe estar entre 1 y 200 kg');
+      kg = Math.round(kg * 10) / 10;
+
+      var fecha = document.getElementById('inputFecha').value;
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha) || fecha < today()) return alert('Elige una fecha de hoy en adelante');
+
       var hora = document.getElementById('inputHora').value;
-      var dir = document.getElementById('inputDir').value || 'Dirección no especificada';
-      var code = 'RC-' + Date.now().toString().slice(-6);
-      var pts = Math.round(kg * 25);
+      if (HORAS.indexOf(hora) === -1) return alert('Franja horaria inválida');
 
-      var d = load();
-      d.history.push({ id: code, mats: mats.slice(), kg: kg, fecha: fecha, hora: hora, dir: dir, status: 'Pendiente', pts: pts });
-      d.kg = +(d.kg + kg).toFixed(1);
-      d.co2 = +(d.co2 + kg * 0.65).toFixed(1);
-      d.points += pts;
-      save(d);
-      addToCommunity(pts, kg, kg * 0.65);
+      var dir = document.getElementById('inputDir').value.trim().replace(/\s+/g, ' ');
+      if (dir.length < 5 || dir.length > 200) return alert('Escribe una dirección válida (entre 5 y 200 caracteres)');
 
-      document.getElementById('qrcode').innerHTML = '';
-      new QRCode(document.getElementById('qrcode'), { text: code, width: 160, height: 160 });
-      document.getElementById('cFecha').textContent = fecha;
-      document.getElementById('cHora').textContent = hora;
-      document.getElementById('cDir').textContent = dir;
-      document.getElementById('cMats').textContent = mats.join(', ') + ' · ' + kg + ' kg';
+      busy = true;
+      var btn = document.querySelector('#page-solicitar .btn-full'); if (btn) btn.disabled = true;
+      try {
+        /* Solo se envían los datos que el usuario elige. Puntos, CO2, estado y código los fija la base de datos. */
+        const r = await sb.from('pickups')
+          .insert({ materials: matsOk, kg: kg, fecha: fecha, hora: hora, direccion: dir })
+          .select('code,pts').single();
+        if (r.error) {
+          if (/Demasiadas solicitudes/i.test(r.error.message || '')) toast('Demasiadas solicitudes seguidas. Intenta más tarde');
+          else toast('No se pudo agendar. Intenta de nuevo');
+          return;
+        }
+        var code = r.data.code, pts = r.data.pts;
 
-      mats = [];
-      document.querySelectorAll('.mat').forEach(function(m) { m.classList.remove('selected'); });
-      go('confirm');
-      toast('¡Agendado! +' + pts + ' puntos 🌱');
+        document.getElementById('qrcode').innerHTML = '';
+        new QRCode(document.getElementById('qrcode'), { text: code, width: 160, height: 160 });
+        document.getElementById('cFecha').textContent = fecha;
+        document.getElementById('cHora').textContent = hora;
+        document.getElementById('cDir').textContent = dir;
+        document.getElementById('cMats').textContent = matsOk.join(', ') + ' · ' + kg + ' kg';
+
+        mats = [];
+        document.querySelectorAll('.mat').forEach(function (m) { m.classList.remove('selected'); });
+        go('confirm');
+        toast('¡Agendado! +' + pts + ' puntos 🌱');
+      } finally {
+        busy = false; if (btn) btn.disabled = false;
+      }
     }
 
+    /* ---------- chat (el texto del usuario NUNCA se inserta como HTML) ---------- */
     function toggleChat() {
       document.getElementById('chatWin').classList.toggle('open');
     }
-    function addMsg(html, type) {
+    function addMsg(content, type, isTrustedHtml) {
       var el = document.getElementById('chatMsgs');
       var d = document.createElement('div');
       d.className = 'msg ' + type;
-      d.innerHTML = html;
+      if (isTrustedHtml) d.innerHTML = content;   /* solo para textos fijos escritos por nosotros */
+      else d.textContent = content;
       el.appendChild(d);
       el.scrollTop = el.scrollHeight;
     }
+    var lastChat = 0;
     function sendChat() {
       var inp = document.getElementById('chatIn');
-      var t = inp.value.trim();
+      var t = inp.value.trim().slice(0, 200);
       if (!t) return;
-      addMsg(t, 'user');
+      if (Date.now() - lastChat < 800) return;      /* freno simple anti-spam */
+      lastChat = Date.now();
+      addMsg(t, 'user', false);
       inp.value = '';
-      setTimeout(function() {
+      setTimeout(function () {
         var l = t.toLowerCase();
         var r = 'Puedo ayudarte a identificar materiales. Sube una foto 📷 o dime qué es.';
         if (l.match(/hola|buenas/)) r = '¡Hola! 😊 ¿Qué material quieres identificar?';
@@ -993,84 +1110,59 @@
         else if (l.match(/vidrio/)) r = '✅ <b>Aprovechable</b>. Vidrio 100% reciclable (no espejos ni cerámica).';
         else if (l.match(/lata|metal|aluminio/)) r = '✅ <b>Aprovechable</b>. Metales tienen alto valor de recuperación.';
         else if (l.match(/organico|comida|cascara/)) r = '❌ No aprovechable en Ruta Circular. Va en residuales/compostaje.';
-        addMsg(r, 'bot');
+        addMsg(r, 'bot', true);
       }, 500);
     }
     function onPhoto(e) {
       var f = e.target.files[0];
-      if (!f) return;
-      var r = new FileReader();
-      r.onload = function() {
-        addMsg('📷 Foto enviada', 'user');
-        setTimeout(function() {
-          var n = f.name.toLowerCase();
-          var msg = 'Según normativa colombiana (Res. 2184/2019), los aprovechables son papel, cartón, plástico, vidrio y metal.';
-          if (n.match(/botella|plastic|pet/)) msg = '✅ <b>Aprovechable</b> — Plástico PET. Enjuágalo y agenda.';
-          else if (n.match(/carton|caja|papel/)) msg = '✅ <b>Aprovechable</b> — Papel/cartón limpio.';
-          else if (n.match(/vidrio|frasco/)) msg = '✅ <b>Aprovechable</b> — Vidrio reciclable.';
-          else if (n.match(/lata|metal/)) msg = '✅ <b>Aprovechable</b> — Metal/aluminio.';
-          else if (n.match(/comida|organico|resto/)) msg = '❌ No aprovechable aquí. Son orgánicos.';
-          addMsg(msg, 'bot');
-        }, 900);
-      };
-      r.readAsDataURL(f);
       e.target.value = '';
+      if (!f) return;
+      /* restringir archivos: solo imágenes, máx. 5 MB */
+      if (!/^image\/(jpeg|png|webp|gif)$/.test(f.type)) { toast('Solo se permiten imágenes JPG, PNG, WEBP o GIF'); return; }
+      if (f.size > 5 * 1024 * 1024) { toast('La imagen no puede pesar más de 5 MB'); return; }
+      addMsg('📷 Foto enviada', 'user', false);
+      setTimeout(function () {
+        var n = f.name.toLowerCase();
+        var msg = 'Según normativa colombiana (Res. 2184/2019), los aprovechables son papel, cartón, plástico, vidrio y metal.';
+        if (n.match(/botella|plastic|pet/)) msg = '✅ <b>Aprovechable</b> — Plástico PET. Enjuágalo y agenda.';
+        else if (n.match(/carton|caja|papel/)) msg = '✅ <b>Aprovechable</b> — Papel/cartón limpio.';
+        else if (n.match(/vidrio|frasco/)) msg = '✅ <b>Aprovechable</b> — Vidrio reciclable.';
+        else if (n.match(/lata|metal/)) msg = '✅ <b>Aprovechable</b> — Metal/aluminio.';
+        else if (n.match(/comida|organico|resto/)) msg = '❌ No aprovechable aquí. Son orgánicos.';
+        addMsg(msg, 'bot', true);
+      }, 900);
     }
 
     function toast(m) {
       var t = document.getElementById('toast');
       t.textContent = m;
       t.classList.add('show');
-      setTimeout(function() { t.classList.remove('show'); }, 2800);
+      setTimeout(function () { t.classList.remove('show'); }, 2800);
     }
 
-    document.getElementById('inputFecha').value = new Date().toISOString().slice(0,10);
-    document.getElementById('inputFecha').min = new Date().toISOString().slice(0,10);
+    document.getElementById('inputFecha').value = today();
+    document.getElementById('inputFecha').min = today();
+    document.getElementById('inputKg').min = 1;
+    document.getElementById('inputKg').max = 200;
+    document.getElementById('inputDir').maxLength = 200;
+    document.getElementById('chatIn').maxLength = 200;
 
-    
-    // ---- GLOBAL / COMMUNITY STATS ----
-    // Base comunitaria (demo académica) + aportes reales de usuarios en este entorno
+    /* ---------- estadísticas de la comunidad (solo totales agregados) ---------- */
+    /* Cifras de demostración sumadas a las reales. Ponlas en 0 antes del lanzamiento. */
     var GLOBAL_SEED = { points: 12840, kg: 486.5, co2: 316.2, users: 37 };
 
-    function loadGlobal() {
-      try {
-        var g = JSON.parse(localStorage.getItem('rc_community') || 'null');
-        if (!g) {
-          g = { points: 0, kg: 0, co2: 0, users: 0, emails: [] };
-          localStorage.setItem('rc_community', JSON.stringify(g));
+    async function renderCommunity() {
+      var g = { points: 0, kg: 0, co2: 0, users: 0 };
+      if (sb) {
+        var r = await sb.rpc('community_stats');
+        if (!r.error && r.data && r.data[0]) {
+          g = { points: Number(r.data[0].points), kg: Number(r.data[0].kg), co2: Number(r.data[0].co2), users: Number(r.data[0].users) };
         }
-        return g;
-      } catch(e) {
-        return { points: 0, kg: 0, co2: 0, users: 0, emails: [] };
       }
-    }
-    function saveGlobal(g) {
-      localStorage.setItem('rc_community', JSON.stringify(g));
-    }
-    function registerUserInCommunity(email) {
-      if (!email) return;
-      var g = loadGlobal();
-      if (!g.emails) g.emails = [];
-      if (g.emails.indexOf(email) === -1) {
-        g.emails.push(email);
-        g.users = g.emails.length;
-        saveGlobal(g);
-      }
-    }
-    function addToCommunity(pts, kg, co2) {
-      var g = loadGlobal();
-      g.points += pts || 0;
-      g.kg = +(g.kg + (kg || 0)).toFixed(1);
-      g.co2 = +(g.co2 + (co2 || 0)).toFixed(1);
-      saveGlobal(g);
-      renderCommunity();
-    }
-    function renderCommunity() {
-      var g = loadGlobal();
-      var points = GLOBAL_SEED.points + (g.points || 0);
-      var kg = +(GLOBAL_SEED.kg + (g.kg || 0)).toFixed(1);
-      var co2 = +(GLOBAL_SEED.co2 + (g.co2 || 0)).toFixed(1);
-      var users = GLOBAL_SEED.users + (g.users || 0);
+      var points = GLOBAL_SEED.points + g.points;
+      var kg = +(GLOBAL_SEED.kg + g.kg).toFixed(1);
+      var co2 = +(GLOBAL_SEED.co2 + g.co2).toFixed(1);
+      var users = GLOBAL_SEED.users + g.users;
       var elP = document.getElementById('homePoints');
       var elK = document.getElementById('homeKg');
       var elC = document.getElementById('homeCo2');
@@ -1081,60 +1173,49 @@
       if (elU) elU.textContent = users + ' personas reciclando';
     }
 
-    window.addEventListener('load', function() {
-      var s = localStorage.getItem('rc_user');
-      if (s) {
-        try {
-          user = JSON.parse(s);
-          document.getElementById('btnGoogle').style.display = 'none';
-          document.getElementById('btnLogin').style.display = 'none';
-          document.getElementById('avatarBtn').style.display = 'block';
-          document.getElementById('navAvatar').src = user.avatar;
-          document.getElementById('bottomNav').classList.add('visible');
-          refresh();
-        } catch(e) {}
-      }
+    window.addEventListener('load', function () {
+      initAuth();
+      renderCommunity();
     });
-  
+
     // ---- PRIVACY BANNER (Ley 1581 - estilo cookies) ----
     function acceptPrivacy() {
-      try { localStorage.setItem('rc_privacy', 'accepted'); } catch(e) {}
+      try { localStorage.setItem('rc_privacy', 'accepted'); } catch (e) {}
       var el = document.getElementById('privacyOverlay');
       if (el) el.classList.remove('open');
       if (typeof toast === 'function') toast('Tratamiento de datos aceptado');
     }
     function rejectPrivacy() {
-      try { localStorage.setItem('rc_privacy', 'rejected'); } catch(e) {}
+      try { localStorage.setItem('rc_privacy', 'rejected'); } catch (e) {}
       var el = document.getElementById('privacyOverlay');
       if (el) el.classList.remove('open');
       if (typeof toast === 'function') toast('Puedes seguir navegando. Puedes cambiar tu decisión borrando datos del sitio');
     }
     function showPrivacyIfNeeded() {
       var v = null;
-      try { v = localStorage.getItem('rc_privacy'); } catch(e) {}
+      try { v = localStorage.getItem('rc_privacy'); } catch (e) {}
       if (!v) {
-        setTimeout(function() {
+        setTimeout(function () {
           var el = document.getElementById('privacyOverlay');
           if (el) el.classList.add('open');
         }, 400);
       }
     }
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
       var a = document.getElementById('btnAcceptPrivacy');
       var r = document.getElementById('btnRejectPrivacy');
       var l = document.getElementById('linkPrivacidad');
       if (a) a.onclick = acceptPrivacy;
       if (r) r.onclick = rejectPrivacy;
-      if (l) l.onclick = function(e) {
+      if (l) l.onclick = function (e) {
         e.preventDefault();
         if (typeof go === 'function') go('privacidad');
-        acceptPrivacy(); // optional: keep open until accept - better close only on buttons
+        acceptPrivacy();
         var el = document.getElementById('privacyOverlay');
         if (el) el.classList.remove('open');
       };
       showPrivacyIfNeeded();
     });
-
   </script>
 </body>
 </html>
